@@ -1,0 +1,41 @@
+{
+	"name": "astro",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "vite dev --host",
+		"build": "vite build",
+		"preview": "vite preview",
+		"start": "node build",
+		"deploy": "cd build && deployctl deploy --project=yew --entrypoint=index.js --prod",
+		"docker:build": "docker image build . -t ghcr.io/jetlua/astro:latest --platform linux/amd64",
+		"docker:push": "docker image push ghcr.io/jetlua/astro:latest"
+	},
+	"devDependencies": {
+		"@sveltejs/kit": "^2.5.24",
+		"@sveltejs/vite-plugin-svelte": "4.0.0-next.6",
+		"@types/chroma-js": "^2.4.4",
+		"@types/cookie": "^0.6.0",
+		"@types/katex": "^0.16.7",
+		"@types/node": "^22.5.0",
+		"autoprefixer": "^10.4.20",
+		"postcss-custom-media": "^11.0.1",
+		"postcss-media-minmax": "^5.0.0",
+		"sass": "^1.77.8",
+		"svelte": "5.0.0-next.238",
+		"svelte-check": "^3.8.6",
+		"tailwindcss": "^3.4.10",
+		"tslib": "^2.7.0",
+		"vite": "^5.4.2"
+	},
+	"type": "module",
+	"dependencies": {
+		"@sveltejs/adapter-node": "^5.2.2",
+		"axios": "^1.7.5",
+		"chroma-js": "^3.0.0",
+		"clsx": "^2.1.1",
+		"dayjs": "^1.11.13",
+		"svelte-preprocess": "^6.0.2",
+		"tailwind-merge": "^2.5.2",
+		"tailwind-variants": "^0.2.1"
+	}
+}

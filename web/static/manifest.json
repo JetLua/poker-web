@@ -1,0 +1,31 @@
+{
+  "name": "朝花夕拾",
+  "short_name": "朝花夕拾",
+  "version": "2.0",
+  "start_url": ".",
+  "id": "dove",
+  "scope": "/",
+  "display": "fullscreen",
+  "background_color": "#fff",
+  "orientation": "portrait",
+  "description": "从未停止对美好事物的探索",
+  "theme_color": "#fff",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "apple-touch-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

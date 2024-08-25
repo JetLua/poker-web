@@ -1,0 +1,36 @@
+{
+  "imports": {
+    "axios": "npm:axios@latest",
+    "~/": "./src/"
+  },
+  "tasks": {
+    "deploy": "deployctl deploy --prod --org=astro",
+    "dev": "deno run -A --env --unstable-http --unstable-kv --unstable-hmr src/app.ts"
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-explicit-any", "ban-types"]
+    }
+  },
+  "unstable": ["http", "kv"],
+  "compilerOptions": {
+    "lib": [
+      "deno.window",
+      "deno.unstable"
+    ],
+    "types": [],
+    "jsx": "precompile",
+    "jsxImportSource": "hono/jsx"
+  },
+  "deploy": {
+    "project": "yake",
+    "exclude": [
+      ".env",
+      ".gitignore",
+      ".prettierrc",
+      ".editorconfig"
+    ],
+    "include": [],
+    "entrypoint": "src/app.ts"
+  }
+}

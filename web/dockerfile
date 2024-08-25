@@ -1,0 +1,7 @@
+from node:slim
+workdir /app
+copy build package.json .npmrc ./website
+workdir ./website
+run npm i
+expose 8080
+cmd node index.js
