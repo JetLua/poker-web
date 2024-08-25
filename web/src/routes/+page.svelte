@@ -2,9 +2,9 @@
   import {Button, Input} from '$lib/sui'
 </script>
 
-<Button bgColor="#fc3">okko</Button>
+<Button>okko</Button>
 <Button variant="outlined">okko</Button>
 <Button variant="outlined" loading>okko</Button>
 <Button variant="outlined" textColor="red">okko</Button>
 
-<Input/>
+<Input placeholder="ok" textColor="purple"/>
