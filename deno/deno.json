@@ -1,9 +1,13 @@
 {
   "imports": {
+    "hono": "jsr:@hono/hono",
     "axios": "npm:axios@latest",
+    "presigner": "npm:@aws-sdk/s3-request-presigner@latest",
+    "s3": "npm:@aws-sdk/client-s3@latest",
     "~/": "./src/"
   },
   "tasks": {
+    "cache": "deno cache --reload src/app.ts",
     "deploy": "deployctl deploy --prod --org=astro",
     "dev": "deno run -A --env --unstable-http --unstable-kv --unstable-hmr src/app.ts"
   },

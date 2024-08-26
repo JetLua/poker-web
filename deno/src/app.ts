@@ -1,5 +1,15 @@
-import * as api from '~/api/mod.ts'
+import {Hono} from 'hono'
+import {cors} from 'hono/cors'
+import {HTTPException} from 'hono/http-exception'
 
-const r = await api.token.get()
+const app = new Hono()
 
-console.log(r)
+app.onError((err, c) => {
+  if (err instanceof HTTPException) return c.json(err.message, err.status)
+  return c.json(err.message, 500)
+})
+
+app.use(cors())
+app.route('/auth', (await import('./route/auth.ts')).default)
+
+Deno.serve(app.fetch)
