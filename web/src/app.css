@@ -6,4 +6,8 @@
   * {
     @apply box-border;
   }
+
+  .w-main {
+    @apply max-w-[1080px] w-full;
+  }
 }

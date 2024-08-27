@@ -1,6 +1,6 @@
 import {HTTPException} from 'hono/http-exception'
-import {decodeBase64, encodeBase64} from 'encoding/base64'
-import {encodeHex} from 'encoding/hex'
+import {decodeBase64} from 'encoding/base64'
+import {decodeHex, encodeHex} from 'encoding/hex'
 import * as env from './env.ts'
 
 export const kv = await Deno.openKv()
@@ -42,7 +42,7 @@ export const aes = {
     const cipher = await crypto.subtle.decrypt({
       name: 'AES-GCM',
       iv: this.iv,
-    }, this.key, typeof data === 'string' ? enc.encode(data) : data)
+    }, this.key, typeof data === 'string' ? decodeHex(data) : data)
 
     return dec.decode(cipher)
   }

@@ -1,3 +1,5 @@
+export * as store from './store.svelte'
+
 export function sync<T>(p: Promise<T>) {
   return p.then(ok).catch(error)
 }

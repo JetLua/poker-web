@@ -21,7 +21,7 @@
 		"postcss-custom-media": "^11.0.1",
 		"postcss-media-minmax": "^5.0.0",
 		"sass": "^1.77.8",
-		"svelte": "5.0.0-next.239",
+		"svelte": "5.0.0-next.240",
 		"svelte-check": "^3.8.6",
 		"tailwindcss": "^3.4.10",
 		"tslib": "^2.7.0",

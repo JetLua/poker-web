@@ -19,3 +19,7 @@ export function complete(opts: {
 export function login() {
   return n.get<null, {url: string, id: string}>('/login')
 }
+
+export function info() {
+  return n.get<null, {name: string, avatar: string}>('/auth/info')
+}

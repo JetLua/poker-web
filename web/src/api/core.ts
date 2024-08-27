@@ -1,8 +1,13 @@
 import axios from 'axios'
 
 const n = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL
+  baseURL: import.meta.env.VITE_BASE_URL,
+  withCredentials: true
 })
+
+// n.interceptors.request.use(r => {
+//   r.headers.c
+// })
 
 n.interceptors.response.use(r => {
   return r.data

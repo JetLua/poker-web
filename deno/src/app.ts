@@ -12,7 +12,7 @@ app.onError((err, c) => {
   return c.json(err.message, 500)
 })
 
-app.use(cors())
+app.use(cors({credentials: true, origin: o => o}))
 app.route('/auth', (await import('./route/auth.ts')).default)
 
 app.get('/login', async c => {
@@ -73,7 +73,9 @@ app.get('/oauth', async c => {
   setCookie(c, 'token', await aes.encode(`${r._id}:${Date.now()}`), {
     // 一个月
     maxAge: 2592000,
+    sameSite: 'None',
     secure: true,
+    path: '/',
     httpOnly: true,
   })
 
