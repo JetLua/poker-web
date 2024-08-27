@@ -2,6 +2,8 @@
   "imports": {
     "hono": "jsr:@hono/hono",
     "axios": "npm:axios@latest",
+    "mongo": "npm:mongodb@latest",
+    "encoding": "jsr:@std/encoding",
     "presigner": "npm:@aws-sdk/s3-request-presigner@latest",
     "s3": "npm:@aws-sdk/client-s3@latest",
     "~/": "./src/"

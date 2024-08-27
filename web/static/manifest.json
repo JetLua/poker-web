@@ -1,6 +1,6 @@
 {
-  "name": "朝花夕拾",
-  "short_name": "朝花夕拾",
+  "name": "Disk",
+  "short_name": "Disk",
   "version": "2.0",
   "start_url": ".",
   "id": "dove",
@@ -12,18 +12,18 @@
   "theme_color": "#fff",
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "logo.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     },
     {
-      "src": "icon.svg",
+      "src": "logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
     },
     {
-      "src": "apple-touch-icon-512.png",
+      "src": "logo.svg",
       "sizes": "512x512",
       "type": "image/png"
     }

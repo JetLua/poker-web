@@ -15,3 +15,7 @@ export function complete(opts: {
   parts: Array<{PartNumber: number, ETag: string}>}) {
   return n.post<null, string>('/auth/multipart/complete', opts)
 }
+
+export function login() {
+  return n.get<null, {url: string, id: string}>('/login')
+}
