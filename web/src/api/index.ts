@@ -1,12 +1,17 @@
+import axios, {type AxiosProgressEvent} from 'axios'
 import n from './core'
 
 export function multipart(num: number) {
-  return n.get<null, {urls: string[], uploadId: string, key: string}>('/auth/multipart', {params: {num}})
+  return n.get<null, {urls: string[], uploadId: string, key: string}>('/auth/multipart', {
+    params: {num}
+  })
 }
 
-export async function put(url: string, data: Blob) {
-  return fetch(url, {method: 'PUT', body: data})
-    .then<string>(r => JSON.parse(r.headers.get('etag')!) as string)
+export async function put(url: string, data: Blob, onUploadProgress?: (e: AxiosProgressEvent) => void) {
+  // return fetch(url, {method: 'PUT', body: data})
+    // .then<string>(r => JSON.parse(r.headers.get('etag')!) as string)
+  return axios.put(url, data, {onUploadProgress})
+    .then(r => r.headers['etag'])
 }
 
 export function complete(opts: {
