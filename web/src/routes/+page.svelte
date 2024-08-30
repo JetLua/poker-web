@@ -125,12 +125,15 @@
 </script>
 
 {#if user.name}
-  <p class="flex items-center border-b border-dashed border-pink-500 w-main m-auto text-purple-500 pb-2">
-    <img class="w-10 border-2 border-solid border-fuchsia-400 rounded-full mr-2" src={user.avatar} alt="avatar"/>
-    <span>Hi, {user.name}</span>
-  </p>
+  <div class="flex justify-between items-center border-b border-dashed border-pink-500 w-main m-auto text-purple-500 pb-2">
+    <div class="flex items-center">
+      <img class="w-10 border-2 border-solid border-fuchsia-400 rounded-full mr-2" src={user.avatar} alt="avatar"/>
+      <span>Hi, {user.name}</span>
+    </div>
+    <Button variant="outlined">New</Button>
+  </div>
 
-  {@render uploader()}
+  <!-- {@render uploader()} -->
 
   <input type="file" class="hidden" bind:this={input}/>
 {:else}
