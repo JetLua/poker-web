@@ -17,3 +17,12 @@ export const user = db.collection<{
     avatar: string
   }
 }>('user')
+
+export const folder = db.collection<{
+  name: string
+  owner: string
+  createdAt: number
+  updatedAt: number
+  /** 默认隐藏 */
+  public?: boolean
+}>('folder')

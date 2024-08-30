@@ -48,4 +48,27 @@ router.get('/info', async c => {
   return c.json(r)
 })
 
+router.post('/folder', async c => {
+  const {name, id} = await c.req.json<{name: string, id?: string}>()
+  if (!name) throw httpErr.Bad
+
+  let r
+  let _id!: ObjectId
+
+  if (id) {
+    _id = new ObjectId(id)
+    r = await db.folder.findOne({_id})
+    if (!r) throw httpErr.NotFound
+  }
+
+  r = await db.folder.findOneAndUpdate({_id}, [{$set: {
+    name,
+    owner: {$ifNull: ['$owner', c.var.id]},
+    createdAt: {$ifNull: ['$createdAt', Date.now()]},
+    updatedAt: Date.now(),
+  }}], {upsert: true, returnDocument: 'after'})
+
+  return c.json(true)
+})
+
 export default router
