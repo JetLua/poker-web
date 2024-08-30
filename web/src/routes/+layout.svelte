@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from 'svelte'
+  import {toast, Toast} from '$lib/sui'
   import * as api from '~/api'
   import {store} from '~/core'
   import '~/app.css'
@@ -25,6 +26,8 @@
   {@render children()}
 </div>
 {/if}
+
+<Toast/>
 
 
 <style global lang="scss">

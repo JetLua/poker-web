@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {Button, Input, Checkbox, AsButton, Popover} from '$lib/sui'
+  import {Button, Input, Checkbox, AsButton, Popover, toast} from '$lib/sui'
   import {Plus, FolderPlus, FileUpload} from '$lib/sui/icon'
   import * as api from '~/api'
   import {sync, store} from '~/core'
@@ -148,13 +148,15 @@
       case 'folder:create': {
         const fn = snap.folderName?.trim()
         const r = await sync(api.folder.set(fn))
-        if (r[1]) return alert(r[1].message)
-        alert(true)
+        if (r[1]) return toast.error(r[1].message)
+        toast('Done')
         handle('dialog:close')
         break
       }
     }
   }
+
+  let c = $state(0)
 </script>
 
 {#if user.name}
@@ -165,6 +167,12 @@
     </div>
     <Button class="text-sm" variant="outlined" bind:ref={snap.newBtn}>New</Button>
   </div>
+
+  <Button onclick={() => {
+    c++
+    if (c % 2) toast.success('dd' + (c).toString())
+    else toast.success('ok' + (c).toString())
+  }}>ok</Button>
 
   <input type="file" class="hidden" bind:this={input}/>
   <Popover target={snap.newBtn}>
