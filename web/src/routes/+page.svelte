@@ -170,7 +170,7 @@
 
   <Button onclick={() => {
     c++
-    if (c % 2) toast.success('dd' + (c).toString())
+    if (c % 2) toast.success('dddddddddddddddddddddddddddddddddddddddddddddddd' + (c).toString())
     else toast.success('ok' + (c).toString())
   }}>ok</Button>
 

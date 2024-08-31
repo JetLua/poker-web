@@ -5,6 +5,7 @@
 		"checkJs": true,
 		"strictNullChecks": true,
 		"noImplicitAny": true,
+		"verbatimModuleSyntax": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
