@@ -14,6 +14,7 @@
   const snap = $state({
     folderName: '',
     newBtn: undefined as undefined | HTMLButtonElement,
+    popover: false,
     loading: {
       createFolder: false
     }
@@ -129,12 +130,10 @@
     }
   }
 
-  // function handle(action: 'folder:create', name: string): void
-  // function handle(action: 'dialog:open'): void
-  // function handle(action: 'dialog:close'): void
   async function handle(action: 'dialog:close' | 'dialog:open' | 'folder:create') {
     switch (action) {
       case 'dialog:open': {
+        snap.popover = false
         dialog.showModal()
         break
       }
@@ -147,16 +146,20 @@
 
       case 'folder:create': {
         const fn = snap.folderName?.trim()
-        const r = await sync(api.folder.set(fn))
+        const r = await sync(api.file.set(fn))
         if (r[1]) return toast.error(r[1].message)
-        toast('Done')
+        toast.success('Done')
         handle('dialog:close')
         break
       }
     }
   }
 
-  let c = $state(0)
+  onMount(async () => {
+    const r = await sync(api.file.get())
+    if (r[1]) toast.error(r[1])
+    console.log(r[0])
+  })
 </script>
 
 {#if user.name}
@@ -168,14 +171,8 @@
     <Button class="text-sm" variant="outlined" bind:ref={snap.newBtn}>New</Button>
   </div>
 
-  <Button onclick={() => {
-    c++
-    if (c % 2) toast.success('dddddddddddddddddddddddddddddddddddddddddddddddd' + (c).toString())
-    else toast.success('ok' + (c).toString())
-  }}>ok</Button>
-
   <input type="file" class="hidden" bind:this={input}/>
-  <Popover target={snap.newBtn}>
+  <Popover target={snap.newBtn} bind:visible={snap.popover}>
     <div class="py-2 w-[16rem]">
       <AsButton class="flex items-center gap-x-2 text-sm leading-10 hover:bg-stone-100 px-2 cursor-pointer text-slate-500" onclick={() => handle('dialog:open')}>
         <FolderPlus class="w-5 h-5"/>

@@ -18,11 +18,18 @@ export const user = db.collection<{
   }
 }>('user')
 
-export const folder = db.collection<{
+export enum FileType {
+  File = 1,
+  Folder = 2
+}
+
+export const file = db.collection<{
   name: string
   owner: string
   createdAt: number
   updatedAt: number
+  parent?: string
+  type: FileType
   /** 默认隐藏 */
   public?: boolean
-}>('folder')
+}>('file')

@@ -15,7 +15,8 @@ export const dec = new TextDecoder()
 export const httpErr = {
   Bad: new HTTPException(400, {message: 'Bad Request'}),
   Failed: new HTTPException(500, {message: 'Unknown Error'}),
-  NotFound: new HTTPException(404, {message: 'Not Found'})
+  NotFound: new HTTPException(404, {message: 'Not Found'}),
+  new: (s: string) => new HTTPException(500, {message: s})
 }
 
 export const aes = {

@@ -29,8 +29,20 @@ export function info() {
   return n.get<null, {name: string, avatar: string}>('/auth/info')
 }
 
-export namespace folder {
+export namespace file {
+  interface File {
+    id: string
+  }
   export function set(name: string, id?: string) {
     return n.post<null, boolean>('/auth/folder', {name, id})
+  }
+
+  export function get(opts?: {
+    parent?: string
+    cursor?: number
+    size?: number
+  }): Promise<Array<File>>
+  export function get(params?: any) {
+    return n.get<null, any>('/auth/files', {params})
   }
 }

@@ -1,17 +1,17 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@hono/hono": "jsr:@hono/hono@4.5.10",
+    "jsr:@hono/hono": "jsr:@hono/hono@4.5.11",
     "jsr:@std/encoding": "jsr:@std/encoding@1.0.3",
     "npm:@aws-sdk/client-s3@latest": "npm:@aws-sdk/client-s3@3.637.0_@aws-sdk+client-sts@3.637.0__@aws-sdk+client-sso-oidc@3.637.0___@aws-sdk+client-sts@3.637.0_@aws-sdk+client-sso-oidc@3.637.0__@aws-sdk+client-sts@3.637.0___@aws-sdk+client-sso-oidc@3.637.0____@aws-sdk+client-sts@3.637.0__@aws-sdk+client-sts@3.637.0___@aws-sdk+client-sso-oidc@3.637.0____@aws-sdk+client-sts@3.637.0_____@aws-sdk+client-sso-oidc@3.637.0___@aws-sdk+client-sso-oidc@3.637.0",
     "npm:@aws-sdk/s3-request-presigner@latest": "npm:@aws-sdk/s3-request-presigner@3.637.0",
     "npm:@types/node": "npm:@types/node@18.16.19",
-    "npm:axios@latest": "npm:axios@1.7.6",
+    "npm:axios@latest": "npm:axios@1.7.7",
     "npm:mongodb@latest": "npm:mongodb@6.8.0"
   },
   "jsr": {
-    "@hono/hono@4.5.10": {
-      "integrity": "801fe47e233b53480322f7a17c621ceb5e9b4335e5fdc14cfc0c7696e8396c34"
+    "@hono/hono@4.5.11": {
+      "integrity": "5bd6b1a3a503efb746fdcf0aae3ac536dd09229d372988bde5db0798ef64ae4f"
     },
     "@std/encoding@1.0.3": {
       "integrity": "5dbc2d7f5aa6062de7e19862ea856ac7a0dcce0b6fb46bb7b332d3bdcd4408b7"
@@ -2195,8 +2195,8 @@
         "tslib"
       ]
     },
-    "@mongodb-js/saslprep@1.1.8": {
-      "integrity": "sha512-qKwC/M/nNNaKUBMQ0nuzm47b7ZYWQHN3pcXq4IIcoSBc2hOIrflAxJduIvvqmhoz3gR2TacTAs8vlsCVPkiEdQ==",
+    "@mongodb-js/saslprep@1.1.9": {
+      "integrity": "sha512-tVkljjeEaAhCqTzajSdgbQ6gE6f3oneVwa3iXR6csiEwXXOFsiC6Uh9iAjAhXPtqa/XMDHWjjeNH/77m/Yq2dw==",
       "dependencies": [
         "sparse-bitfield"
       ]
@@ -2653,8 +2653,8 @@
     "asynckit@0.4.0": {
       "integrity": "sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q=="
     },
-    "axios@1.7.6": {
-      "integrity": "sha512-Ekur6XDwhnJ5RgOCaxFnXyqlPALI3rVeukZMwOdfghW7/wGz784BYKiQq+QD8NPcr91KRo30KfHOchyijwWw7g==",
+    "axios@1.7.7": {
+      "integrity": "sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==",
       "dependencies": [
         "follow-redirects",
         "form-data",
