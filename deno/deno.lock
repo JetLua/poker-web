@@ -1,13 +1,13 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@hono/hono": "jsr:@hono/hono@4.5.11",
-    "jsr:@std/encoding": "jsr:@std/encoding@1.0.3",
-    "npm:@aws-sdk/client-s3@latest": "npm:@aws-sdk/client-s3@3.637.0_@aws-sdk+client-sts@3.637.0__@aws-sdk+client-sso-oidc@3.637.0___@aws-sdk+client-sts@3.637.0_@aws-sdk+client-sso-oidc@3.637.0__@aws-sdk+client-sts@3.637.0___@aws-sdk+client-sso-oidc@3.637.0____@aws-sdk+client-sts@3.637.0__@aws-sdk+client-sts@3.637.0___@aws-sdk+client-sso-oidc@3.637.0____@aws-sdk+client-sts@3.637.0_____@aws-sdk+client-sso-oidc@3.637.0___@aws-sdk+client-sso-oidc@3.637.0",
-    "npm:@aws-sdk/s3-request-presigner@latest": "npm:@aws-sdk/s3-request-presigner@3.637.0",
-    "npm:@types/node": "npm:@types/node@18.16.19",
-    "npm:axios@latest": "npm:axios@1.7.7",
-    "npm:mongodb@latest": "npm:mongodb@6.8.0"
+    "jsr:@hono/hono@*": "4.5.11",
+    "jsr:@std/encoding@*": "1.0.3",
+    "npm:@aws-sdk/client-s3@latest": "3.637.0_@aws-sdk+client-sts@3.637.0__@aws-sdk+client-sso-oidc@3.637.0___@aws-sdk+client-sts@3.637.0_@aws-sdk+client-sso-oidc@3.637.0__@aws-sdk+client-sts@3.637.0___@aws-sdk+client-sso-oidc@3.637.0____@aws-sdk+client-sts@3.637.0__@aws-sdk+client-sts@3.637.0___@aws-sdk+client-sso-oidc@3.637.0____@aws-sdk+client-sts@3.637.0_____@aws-sdk+client-sso-oidc@3.637.0___@aws-sdk+client-sso-oidc@3.637.0",
+    "npm:@aws-sdk/s3-request-presigner@latest": "3.637.0",
+    "npm:@types/node@*": "18.16.19",
+    "npm:axios@latest": "1.7.7",
+    "npm:mongodb@latest": "6.8.0"
   },
   "jsr": {
     "@hono/hono@4.5.11": {
@@ -2682,8 +2682,8 @@
         "strnum"
       ]
     },
-    "follow-redirects@1.15.6": {
-      "integrity": "sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA=="
+    "follow-redirects@1.15.8": {
+      "integrity": "sha512-xgrmBhBToVKay1q2Tao5LI26B83UhrB/vM1avwVSDzt8rx3rO6AizBAaF46EgksTVr+rFTQaqZZ9MVBfUe4nig=="
     },
     "form-data@4.0.0": {
       "integrity": "sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==",
@@ -2760,8 +2760,8 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono",
-      "jsr:@std/encoding",
+      "jsr:@hono/hono@*",
+      "jsr:@std/encoding@*",
       "npm:@aws-sdk/client-s3@latest",
       "npm:@aws-sdk/s3-request-presigner@latest",
       "npm:axios@latest",

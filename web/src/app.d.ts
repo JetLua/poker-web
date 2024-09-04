@@ -15,6 +15,19 @@ declare global {
 	interface ImportMeta {
 		readonly env: ImportMetaEnv
 	}
+
+	namespace yew {
+		interface File {
+			parent?: string
+			id: string
+			name: string
+			type: 1 | 2
+			createdAt: number
+			updatedAt: number
+		}
+	}
 }
+
+
 
 export {}

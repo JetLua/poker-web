@@ -1,9 +1,11 @@
 <script lang="ts">
+  import dayjs from 'dayjs'
   import {onMount} from 'svelte'
   import {Button, Input, Checkbox, AsButton, Popover, toast} from '$lib/sui'
-  import {Plus, FolderPlus, FileUpload} from '$lib/sui/icon'
+  import {Plus, FolderPlus, FileUpload, File, Folder, Dots} from '$lib/sui/icon'
   import * as api from '~/api'
   import {sync, store} from '~/core'
+  import Uploader from './Uploader.svelte'
 
   // svelte-ignore non_reactive_update
   let input: HTMLInputElement
@@ -15,6 +17,8 @@
     folderName: '',
     newBtn: undefined as undefined | HTMLButtonElement,
     popover: false,
+    files: [] as yew.File[],
+    uploadFiles: undefined as undefined | FileList,
     loading: {
       createFolder: false
     }
@@ -25,112 +29,13 @@
     location.href = r.url
   }
 
-  class Task {
-    size = 5 * 1024 * 1024
-
-    microTasks = [] as Array<{
-      key: string
-      file: File
-      i: number
-      uploadId: string
-      url: string
-      total: number
-    }>
-
-    macroTasks = new Map<string, {total: number, key: string}>()
-
-
-    constructor(files: FileList) {
-      this.run(files)
-    }
-
-    async run(files: FileList) {
-      for (let i = 0; i < files.length; i++) {
-        const f = files.item(i)!
-        if (f.size > this.size) {
-          await this.multipart(f)
-        }
-      }
-
-      const doneTasks = new Map<string, {i: number, key: string, eTag: string}[]>()
-
-      // 每次选取10个任务
-      while (this.microTasks.length) {
-        const tasks = this.microTasks.splice(0, 10)
-        const r = await sync(Promise.all(tasks.map(async ({i, file, url, key, total, uploadId}) => {
-          const j = i + 1
-          const part = file.slice(i * this.size, j * this.size)
-          return {
-            i: j,
-            key,
-            total,
-            uploadId,
-            eTag: await api.put(url, part, e => console.log(e.progress)),
-          }
-        })))
-
-        if (r[1]) return alert(r[1].message)
-
-        for (const item of r[0]) {
-          const t = doneTasks.get(item.uploadId)
-          if (t) t.push(item)
-          else doneTasks.set(item.uploadId, [item])
-        }
-      }
-
-      console.log(doneTasks, this.macroTasks)
-
-      for (const id of doneTasks.keys()) {
-        const mat = this.macroTasks.get(id)
-        const dt = doneTasks.get(id)
-        if (!mat || !dt) continue
-        const {total} = mat
-        if (total === dt.length) {
-          // complete
-          api.complete({
-            key: mat.key,
-            uploadId: id,
-            parts: dt.map(item => {
-              return {
-                PartNumber: item.i,
-                ETag: item.eTag
-              }
-            })
-          })
-        }
-      }
-    }
-
-    async multipart(file: File) {
-      const total = Math.ceil(file.size / this.size)
-      const [r, err] = await sync(api.multipart(total))
-      if (err) return [null, err]
-      const {uploadId, urls, key} = r
-      this.macroTasks.set(uploadId, {total, key})
-      this.microTasks.push(...Array.from({length: total}, (_, i) => {
-        return {
-          i,
-          key,
-          file,
-          total,
-          uploadId,
-          url: urls[i],
-        }
-      }))
-    }
+  async function loadFiles() {
+    const r = await sync(api.file.get())
+    if (r[1]) return toast.error(r[1])
+    snap.files = r[0]
   }
 
-  function upload() {
-    input.value = ''
-    input.click()
-    input.onchange = () => {
-      const files = input.files
-      if (!files || !files.length) return
-      new Task(files)
-    }
-  }
-
-  async function handle(action: 'dialog:close' | 'dialog:open' | 'folder:create') {
+  async function handle(action: 'dialog:close' | 'dialog:open' | 'folder:create' | 'file:choose') {
     switch (action) {
       case 'dialog:open': {
         snap.popover = false
@@ -150,15 +55,24 @@
         if (r[1]) return toast.error(r[1].message)
         toast.success('Done')
         handle('dialog:close')
+        loadFiles()
+        break
+      }
+
+      case 'file:choose': {
+        snap.popover = false
+        input.value = ''
+        input.click()
+        input.onchange = () => {
+          snap.uploadFiles = input.files!
+        }
         break
       }
     }
   }
 
-  onMount(async () => {
-    const r = await sync(api.file.get())
-    if (r[1]) toast.error(r[1])
-    console.log(r[0])
+  onMount(() => {
+    loadFiles()
   })
 </script>
 
@@ -171,17 +85,26 @@
     <Button class="text-sm" variant="outlined" bind:ref={snap.newBtn}>New</Button>
   </div>
 
-  <input type="file" class="hidden" bind:this={input}/>
+  {#each snap.files as {name, id, type, createdAt, updatedAt} (id)}
+    <div class="flex items-center w-main m-auto h-12 hover:bg-gray-100 cursor-pointer">
+      {#if type === 1}<File/>{:else}<Folder class="stroke-indigo-400"/>{/if}
+      <p class="text-sm text-slate-800 flex-1 text-ellipsis overflow-hidden whitespace-nowrap ml-2">{name}</p>
+      <span class="text-xs text-stone-500 font-[monospace] mr-4 md:mr-8">{dayjs(updatedAt).format('MM/DD/YYYY HH:mm:ss')}</span>
+      <Button variant="icon"><Dots class="stroke-sky-500"/></Button>
+    </div>
+  {/each}
+
+  <input type="file" multiple class="hidden" bind:this={input}/>
   <Popover target={snap.newBtn} bind:visible={snap.popover}>
     <div class="py-2 w-[16rem]">
-      <AsButton class="flex items-center gap-x-2 text-sm leading-10 hover:bg-stone-100 px-2 cursor-pointer text-slate-500" onclick={() => handle('dialog:open')}>
+      <AsButton class="flex items-center gap-x-2 text-sm leading-10 hover:bg-stone-100 px-2 text-slate-500 cursor-pointer" onclick={() => handle('dialog:open')}>
         <FolderPlus class="w-5 h-5"/>
         <span>New folder</span>
       </AsButton>
-      <p class="flex items-center gap-x-2 text-sm leading-10 hover:bg-stone-100 px-2 cursor-pointer text-slate-500">
+      <AsButton class="flex items-center gap-x-2 text-sm leading-10 hover:bg-stone-100 px-2 cursor-pointer text-slate-500" onclick={() => handle('file:choose')}>
         <FileUpload class="w-5 h-5"/>
         <span>File upload</span>
-      </p>
+      </AsButton>
     </div>
   </Popover>
 {:else}
@@ -198,11 +121,9 @@
   </div>
 </dialog>
 
-{#snippet uploader()}
-  <button class="w-16 flex items-center cursor-pointer justify-center aspect-square fixed bottom-8 right-8 bg-sky-400 rounded-full" onclick={upload}>
-    <Plus class="w-8 h-8" --stroke="white"/>
-  </button>
-{/snippet}
+{#if snap.uploadFiles}
+  <Uploader files={snap.uploadFiles}/>
+{/if}
 
 <style lang="scss">
   dialog::backdrop {

@@ -14,6 +14,10 @@ export async function put(url: string, data: Blob, onUploadProgress?: (e: AxiosP
     .then(r => r.headers['etag'])
 }
 
+export async function preput() {
+  return n.get<null, {key: string, url: string}>('/auth/preput')
+}
+
 export function complete(opts: {
   key: string
   uploadId: string
@@ -30,9 +34,6 @@ export function info() {
 }
 
 export namespace file {
-  interface File {
-    id: string
-  }
   export function set(name: string, id?: string) {
     return n.post<null, boolean>('/auth/folder', {name, id})
   }
@@ -41,7 +42,7 @@ export namespace file {
     parent?: string
     cursor?: number
     size?: number
-  }): Promise<Array<File>>
+  }): Promise<Array<yew.File>>
   export function get(params?: any) {
     return n.get<null, any>('/auth/files', {params})
   }

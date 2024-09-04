@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-namespace
 import {
   S3Client, ListBucketsCommand, CreateMultipartUploadCommand,
-  UploadPartCommand, CompleteMultipartUploadCommand,
+  UploadPartCommand, CompleteMultipartUploadCommand, PutObjectCommand,
   type CreateMultipartUploadRequest,
   type CompletedPart,
 } from 's3'
@@ -70,5 +70,16 @@ export namespace uploader {
       UploadId: opts.uploadId,
       MultipartUpload: {Parts: opts.parts}
     }))
+  }
+
+  export async function put() {
+    const key = crypto.randomUUID()
+    return {
+      key,
+      url: await getSignedUrl(s3, new PutObjectCommand({
+        Bucket: env.R2_BUCKET,
+        Key: key
+      }))
+    }
   }
 }

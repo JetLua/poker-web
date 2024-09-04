@@ -82,11 +82,18 @@ router.get('/files', async c => {
   cursor = +cursor
 
   return c.json(await db.file
-    .find({parent, owner: c.var.id})
+    .find(
+      {parent, owner: c.var.id},
+      {projection: {id: '$_id', _id: 0, name: 1, createdAt: 1, updatedAt: 1, parent: 1, type: 1}}
+    )
     .sort({type: -1, updatedAt: -1})
     .skip(cursor * size)
     .limit(size)
     .toArray())
+})
+
+router.get('/preput', async c => {
+  return c.json(await api.s3.uploader.put())
 })
 
 export default router
