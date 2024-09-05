@@ -19,10 +19,11 @@ export async function preput() {
 }
 
 export function complete(opts: {
+  name: string
   key: string
   uploadId: string
   parts: Array<{PartNumber: number, ETag: string}>}) {
-  return n.post<null, string>('/auth/multipart/complete', opts)
+  return n.post<null, string>('/auth/complete', opts)
 }
 
 export function login() {

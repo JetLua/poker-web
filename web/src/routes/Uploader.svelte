@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {sync} from '~/core'
+  import {md5, sync} from '~/core'
   import {toast} from '$lib/sui'
   // class Task {
   //   size = 5 * 1024 * 1024
@@ -107,6 +107,7 @@
   // }
   import * as api from '~/api'
   import {onMount} from 'svelte'
+    import {limits} from 'chroma-js'
 
   type Q = {
     i: number
@@ -198,7 +199,6 @@
         })
       }
     }
-
     // 预处理完成开始上传
     // 但每次只传10个
     while (snap.queue.length) {
@@ -224,8 +224,6 @@
       }))
     }
 
-    console.log(snap.uploadedSize, snap.total)
-
     // 过滤出分片上传的文件
     const _files = snap.files.filter(item => 'uploadId' in item)
 
@@ -233,6 +231,7 @@
       const items = _files.splice(0, 10)
       Promise.all(items.map(item => {
         return api.complete({
+          name: item.name,
           key: item.key,
           parts: item.parts,
           uploadId: item.uploadId
@@ -246,8 +245,16 @@
   })
 </script>
 
-<div class="root h-20 w-20 bg-indigo-500 fixed bottom-8 right-4">
-  <div class="w-full font-[monospace] h-full flex items-center justify-center text-white font-bold text-lg">{toPrecent(progress)}</div>
+<div class="root group h-20 w-20 fixed bottom-8 right-4 overflow-hidden hover:shadow">
+  <div class="group-hover:hidden bg-indigo-500 w-full font-[monospace] h-full flex items-center justify-center text-white font-bold text-lg">{toPrecent(progress)}</div>
+  <ol class="flex-col list h-full w-full hidden group-hover:flex absolute top-0 left-0 bg-white">
+    {#each snap.files as f (f.key)}
+      <li class="text-slate-500 whitespace-nowrap text-ellipsis h-10 w-full flex justify-between items-center text-sm px-2 relative" style:--w="50%">
+        <span class="flex-1">{f.name}</span>
+        <span class="shrink-0 text-pink-500 font-[monospace]">{toPrecent(f.uploadedSize / f.total)}</span>
+      </li>
+    {/each}
+  </ol>
 </div>
 
 <style lang="scss">
@@ -260,6 +267,11 @@
       width: 20rem;
       height: 32rem;
       cursor: default;
+      border: 1px solid #eee;
+    }
+
+    li:not(:first-child) {
+      border-top: 1px dashed #ccc;
     }
   }
 

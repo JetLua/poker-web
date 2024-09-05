@@ -1,6 +1,7 @@
 import {Hono} from 'hono'
 import {cors} from 'hono/cors'
-import {getCookie, setCookie} from 'hono/cookie'
+import {crypto} from 'jsr:@std/crypto'
+import {setCookie} from 'hono/cookie'
 import {HTTPException} from 'hono/http-exception'
 import {env, httpErr, kv, db, aes} from '~/core/mod.ts'
 import * as api from '~/api/mod.ts'

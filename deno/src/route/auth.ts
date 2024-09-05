@@ -31,13 +31,67 @@ router.use(async (c, next) => {
 router.get('/multipart', async c => {
   const num = c.req.query('num')
   if (!num) throw httpErr.Bad
+  const hash = c.req.query('hash')
+  if (hash) {
+    const r = await db.file.findOne({hash})
+    if (r) return c.json({key: r.key})
+  }
   return c.json(await api.s3.uploader.multipart({acl: 'private', num: +num}))
 })
 
-router.post('/multipart/complete', async c => {
-  const {uploadId, parts, key} = await c.req.json<{key: string, uploadId: string, parts: CompletedPart[]}>()
+router.post('/complete', async c => {
+  const {uploadId, parts, key, name, parent, eTag, skipped} = await c.req.json<{
+    key: string
+    name: string
+    parent?: string
+    uploadId: string
+    parts?: CompletedPart[]
+    eTag?: string
+    skipped?: boolean
+  }>()
   if (!uploadId) throw httpErr.Bad
-  return c.json(await api.s3.uploader.complete({key, uploadId, parts}))
+
+  const now = Date.now()
+
+  if (skipped) {
+
+  }
+
+  if (parts) {
+    const r = await api.s3.uploader.complete({key, uploadId, parts})
+
+    if (!r.ETag) throw httpErr.new('No ETag')
+
+    let eTag = JSON.parse(r.ETag)
+    eTag = eTag.split('-')[0]
+
+    await db.file.insertOne({
+      key,
+      name,
+      parent,
+      hash: r.ETag,
+      createdAt: now,
+      updatedAt: now,
+      owner: c.var.id,
+      type: db.FileType.File
+    })
+
+    return c.json(true)
+  }
+
+  // todo: 验证信息
+  await db.file.insertOne({
+    key,
+    name,
+    parent,
+    hash: eTag!,
+    type: db.FileType.File,
+    owner: c.var.id,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  return c.json(true)
 })
 
 router.get('/info', async c => {
@@ -93,7 +147,13 @@ router.get('/files', async c => {
 })
 
 router.get('/preput', async c => {
+  const hash = c.req.query('hash')
+  if (hash) {
+    const r = await db.file.findOne({hash})
+    if (r) return c.json({key: r.key})
+  }
   return c.json(await api.s3.uploader.put())
 })
+
 
 export default router
