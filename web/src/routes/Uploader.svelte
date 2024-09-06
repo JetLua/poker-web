@@ -1,113 +1,8 @@
 <script lang="ts">
+  import {onMount, untrack} from 'svelte'
   import {md5, sync} from '~/core'
   import {toast} from '$lib/sui'
-  // class Task {
-  //   size = 5 * 1024 * 1024
-
-  //   microTasks = [] as Array<{
-  //     key: string
-  //     file: File
-  //     i: number
-  //     uploadId: string
-  //     url: string
-  //     total: number
-  //   }>
-
-  //   macroTasks = new Map<string, {total: number, key: string}>()
-
-
-  //   constructor(files: FileList) {
-  //     this.run(files)
-  //   }
-
-  //   async run(files: FileList) {
-  //     for (let i = 0; i < files.length; i++) {
-  //       const f = files.item(i)!
-  //       if (f.size > this.size) {
-  //         await this.multipart(f)
-  //       }
-  //     }
-
-  //     const doneTasks = new Map<string, {i: number, key: string, eTag: string}[]>()
-
-  //     // 每次选取10个任务
-  //     while (this.microTasks.length) {
-  //       const tasks = this.microTasks.splice(0, 10)
-  //       const r = await sync(Promise.all(tasks.map(async ({i, file, url, key, total, uploadId}) => {
-  //         const j = i + 1
-  //         const part = file.slice(i * this.size, j * this.size)
-  //         return {
-  //           i: j,
-  //           key,
-  //           total,
-  //           uploadId,
-  //           eTag: await api.put(url, part, e => console.log(e.progress)),
-  //         }
-  //       })))
-
-  //       if (r[1]) return alert(r[1].message)
-
-  //       for (const item of r[0]) {
-  //         const t = doneTasks.get(item.uploadId)
-  //         if (t) t.push(item)
-  //         else doneTasks.set(item.uploadId, [item])
-  //       }
-  //     }
-
-  //     console.log(doneTasks, this.macroTasks)
-
-  //     for (const id of doneTasks.keys()) {
-  //       const mat = this.macroTasks.get(id)
-  //       const dt = doneTasks.get(id)
-  //       if (!mat || !dt) continue
-  //       const {total} = mat
-  //       if (total === dt.length) {
-  //         // complete
-  //         api.complete({
-  //           key: mat.key,
-  //           uploadId: id,
-  //           parts: dt.map(item => {
-  //             return {
-  //               PartNumber: item.i,
-  //               ETag: item.eTag
-  //             }
-  //           })
-  //         })
-  //       }
-  //     }
-  //   }
-
-  //   async multipart(file: File) {
-  //     const total = Math.ceil(file.size / this.size)
-  //     const [r, err] = await sync(api.multipart(total))
-  //     if (err) return [null, err]
-  //     const {uploadId, urls, key} = r
-  //     this.macroTasks.set(uploadId, {total, key})
-  //     this.microTasks.push(...Array.from({length: total}, (_, i) => {
-  //       return {
-  //         i,
-  //         key,
-  //         file,
-  //         total,
-  //         uploadId,
-  //         url: urls[i],
-  //       }
-  //     }))
-  //   }
-  // }
-
-  // function upload() {
-  //   input.value = ''
-  //   input.click()
-  //   input.onchange = () => {
-  //     const files = input.files
-  //     if (!files || !files.length) return
-  //     new Task(files)
-  //   }
-  // }
   import * as api from '~/api'
-  import {onMount} from 'svelte'
-    import {limits} from 'chroma-js'
 
   type Q = {
     i: number
@@ -123,11 +18,15 @@
     uploadedSize: number
     total: number
     uploadId: string
+    skipped?: boolean
+    hash?: string
     parts: {
       PartNumber: number
       ETag: string
     }[]
   } | {
+    skipped?: boolean
+    hash?: string
     name: string
     key: string
     uploadedSize: number
@@ -137,117 +36,171 @@
   const snap = $state({
     uploadedSize: 0,
     total: 0,
+    done: true,
     files: [] as F[],
-    queue: [] as Q[]
+    queue: [] as Q[],
+    tasks: [] as Q[],
   })
 
   const progress = $derived(snap.total ? snap.uploadedSize / snap.total : 0)
 
   interface Props {
     files: FileList
+    parent?: string
   }
 
   const BLOCK_SIZE = 5 * 1024 * 1024
-  const {files}: Props = $props()
+  const {files, parent}: Props = $props()
 
   function toPrecent(i: number) {
     return (i * 100).toFixed(0) + '%'
   }
 
-  async function chunk(f: File) {
+  async function multipart(f: File) {
     const total = Math.ceil(f.size / BLOCK_SIZE)
-    const {urls, key, uploadId} = await api.multipart(total)
-    snap.files.push({
-      key,
-      uploadId,
-      name: f.name,
-      total: f.size,
-      uploadedSize: 0,
-      parts: []
-    })
-    snap.queue.push(...urls.map((url, i) => {
-      return {
-        i,
-        f,
-        url,
-        key,
-        uploadId
+    const hash = await md5(f, BLOCK_SIZE)
+    api.multipart(total, hash).then(r => {
+      if ('uploadId' in r) {
+        const {key, uploadId, urls} = r
+        snap.files.push({
+          key,
+          uploadId,
+          uploadedSize: 0,
+          parts: [],
+          total: f.size,
+          name: f.name,
+        })
+        snap.tasks.push(...urls.map((url, i) => ({i, f, url, key, uploadId})))
+      } else {
+        snap.files.push({
+          key: r.key,
+          name: f.name,
+          total: f.size,
+          uploadedSize: f.size,
+          skipped: true
+        })
+
+        snap.uploadedSize += f.size
+
+        // 直接完成
+        api.complete({
+          key: r.key,
+          name: f.name,
+          skipped: true,
+          parent,
+          hash
+        })
       }
-    }))
+    })
   }
 
-  async function init() {
-    // todo: md5 验证是否已有相同文件
+  async function preput(f: File) {
+    const hash = await md5(f)
+    const r = await api.preput(hash)
+    if ('url' in r) {
+      snap.tasks.push({f, ...r})
+      snap.files.push({
+        key: r.key,
+        uploadedSize: 0,
+        total: f.size,
+        name: f.name
+      })
+    } else {
+      snap.files.push({
+        uploadedSize: f.size,
+        total: f.size,
+        name: f.name,
+        key: r.key,
+        skipped: true
+      })
+
+      snap.uploadedSize += f.size
+
+      // 直接完成
+      api.complete({
+        hash,
+        name: f.name,
+        skipped: true,
+        key: r.key,
+        parent
+      })
+    }
+  }
+  /**
+   * 1. 创建上传任务
+   * 2. 创建文件列表
+   */
+  async function handle(files: FileList) {
     for (let i = 0; i < files.length; i++) {
       const f = files.item(i)!
       snap.total += f.size
-      if (f.size > BLOCK_SIZE) {
-        await chunk(f)
-      } else {
-        const r = await sync(api.preput())
-        if (r[1]) return toast.error(r[1])
-        snap.queue.push({
-          f,
-          key: r[0].key,
-          url: r[0].url,
-        })
-        snap.files.push({
-          uploadedSize: 0,
-          total: f.size,
-          name: f.name,
-          key: r[0].key
-        })
-      }
+      if (f.size > BLOCK_SIZE) multipart(f)
+      else preput(f)
     }
-    // 预处理完成开始上传
-    // 但每次只传10个
-    while (snap.queue.length) {
-      const tasks = snap.queue.splice(0, 10)
-      await Promise.all(tasks.map(async item => {
+  }
+
+  async function loop(tasks: Q[]) {
+    if (!snap.done) return
+    while (tasks.length) {
+      const _tasks = tasks.splice(0, 10)
+      await Promise.all(_tasks.map(async item => {
         if ('uploadId' in item) {
           const {i, f, key, url} = item
           const j = i + 1
           const part = f.slice(i * BLOCK_SIZE, j * BLOCK_SIZE)
           const tf = snap.files.find(f => f.key === key)!
-          const eTag = await api.put(url, part)
+          const hash = await api.put(url, part)
 
           snap.uploadedSize += part.size
           tf.uploadedSize += part.size
+          // @ts-expect-error
+          tf.parts.push({PartNumber: j, ETag: hash})
 
-          if ('parts' in tf) tf.parts.push({PartNumber: j, ETag: eTag})
+          // 上传完成
+          if (tf.uploadedSize === tf.total) {
+            await api.complete({
+              key,
+              hash,
+              name: f.name,
+              // @ts-expect-error
+              parts: tf.parts,
+              // @ts-expect-error
+              uploadId: tf.uploadId
+            })
+          }
         } else {
           const tf = snap.files.find(f => f.key === item.key)!
-          await api.put(item.url, item.f)
+          const hash = await api.put(item.url, item.f)
           snap.uploadedSize += item.f.size
           tf.uploadedSize += item.f.size
+          tf.hash = hash
+          if (tf.uploadedSize === tf.total) {
+            await api.complete({
+              key: tf.key,
+              hash,
+              name: tf.name,
+            })
+          }
         }
       }))
     }
-
-    // 过滤出分片上传的文件
-    const _files = snap.files.filter(item => 'uploadId' in item)
-
-    while (_files.length) {
-      const items = _files.splice(0, 10)
-      Promise.all(items.map(item => {
-        return api.complete({
-          name: item.name,
-          key: item.key,
-          parts: item.parts,
-          uploadId: item.uploadId
-        })
-      }))
-    }
+    snap.done = true
   }
 
-  onMount(() => {
-    init()
+  $effect(() => {
+    const _files = files
+    untrack(() => handle(_files))
+  })
+
+  $effect(() => {
+    const tasks = snap.tasks
+    untrack(() => loop(tasks))
   })
 </script>
 
 <div class="root group h-20 w-20 fixed bottom-8 right-4 overflow-hidden hover:shadow">
   <div class="group-hover:hidden bg-indigo-500 w-full font-[monospace] h-full flex items-center justify-center text-white font-bold text-lg">{toPrecent(progress)}</div>
-  <ol class="flex-col list h-full w-full hidden group-hover:flex absolute top-0 left-0 bg-white">
+  <ol class="list h-full w-full hidden group-hover:block absolute top-0 left-0 bg-white overflow-auto">
     {#each snap.files as f (f.key)}
       <li class="text-slate-500 whitespace-nowrap text-ellipsis h-10 w-full flex justify-between items-center text-sm px-2 relative" style:--w="50%">
         <span class="flex-1">{f.name}</span>

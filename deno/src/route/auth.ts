@@ -40,36 +40,48 @@ router.get('/multipart', async c => {
 })
 
 router.post('/complete', async c => {
-  const {uploadId, parts, key, name, parent, eTag, skipped} = await c.req.json<{
+  const {uploadId, parts, key, name, parent, hash, skipped} = await c.req.json<{
     key: string
     name: string
     parent?: string
     uploadId: string
     parts?: CompletedPart[]
-    eTag?: string
+    hash?: string
     skipped?: boolean
   }>()
-  if (!uploadId) throw httpErr.Bad
 
   const now = Date.now()
 
   if (skipped) {
+    await db.file.insertOne({
+      key,
+      name,
+      hash: hash!,
+      parent,
+      createdAt: now,
+      updatedAt: now,
+      owner: c.var.id,
+      type: db.FileType.File
+    })
 
+    return c.json(true)
   }
 
   if (parts) {
+    if (!uploadId) throw httpErr.Bad
+
     const r = await api.s3.uploader.complete({key, uploadId, parts})
 
     if (!r.ETag) throw httpErr.new('No ETag')
 
-    let eTag = JSON.parse(r.ETag)
-    eTag = eTag.split('-')[0]
+    let hash = r.ETag.replaceAll('"', '')
+    hash = hash.split('-')[0]
 
     await db.file.insertOne({
       key,
       name,
+      hash,
       parent,
-      hash: r.ETag,
       createdAt: now,
       updatedAt: now,
       owner: c.var.id,
@@ -84,7 +96,7 @@ router.post('/complete', async c => {
     key,
     name,
     parent,
-    hash: eTag!,
+    hash: hash!,
     type: db.FileType.File,
     owner: c.var.id,
     createdAt: now,
