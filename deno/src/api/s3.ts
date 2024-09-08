@@ -2,8 +2,10 @@
 import {
   S3Client, ListBucketsCommand, CreateMultipartUploadCommand,
   UploadPartCommand, CompleteMultipartUploadCommand, PutObjectCommand,
+  HeadObjectCommand,
   type CreateMultipartUploadRequest,
   type CompletedPart,
+  type HeadObjectCommandInput
 } from 's3'
 import {getSignedUrl} from 'presigner'
 import {env} from '~/core/mod.ts'
@@ -19,6 +21,10 @@ const s3 = new S3Client({
 
 export function list() {
   return s3.send(new ListBucketsCommand())
+}
+
+export function head(opts: HeadObjectCommandInput) {
+  return s3.send(new HeadObjectCommand(opts))
 }
 
 export namespace uploader {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount, untrack} from 'svelte'
-  import {md5, sync} from '~/core'
+  import {initWorker, md5, sync} from '~/core'
   import {toast} from '$lib/sui'
   import * as api from '~/api'
 
@@ -13,6 +13,7 @@
   } | {key: string, url: string, f: File}
 
   type F = {
+    f?: File
     name: string
     key: string
     uploadedSize: number
@@ -25,6 +26,7 @@
       ETag: string
     }[]
   } | {
+    f?: File
     skipped?: boolean
     hash?: string
     name: string
@@ -38,7 +40,6 @@
     total: 0,
     done: true,
     files: [] as F[],
-    queue: [] as Q[],
     tasks: [] as Q[],
   })
 
@@ -47,77 +48,62 @@
   interface Props {
     files: FileList
     parent?: string
+    onComplete?: (done?: boolean) => void
   }
 
   const BLOCK_SIZE = 5 * 1024 * 1024
-  const {files, parent}: Props = $props()
+  const {files, parent, onComplete}: Props = $props()
 
   function toPrecent(i: number) {
     return (i * 100).toFixed(0) + '%'
   }
 
-  async function multipart(f: File) {
+  async function multipart(item: Extract<F, {uploadId: string}>) {
+    const f = item.f!
+    delete item.f
+
     const total = Math.ceil(f.size / BLOCK_SIZE)
-    const hash = await md5(f, BLOCK_SIZE)
-    api.multipart(total, hash).then(r => {
-      if ('uploadId' in r) {
-        const {key, uploadId, urls} = r
-        snap.files.push({
-          key,
-          uploadId,
-          uploadedSize: 0,
-          parts: [],
-          total: f.size,
-          name: f.name,
-        })
-        snap.tasks.push(...urls.map((url, i) => ({i, f, url, key, uploadId})))
-      } else {
-        snap.files.push({
-          key: r.key,
-          name: f.name,
-          total: f.size,
-          uploadedSize: f.size,
-          skipped: true
-        })
+    const hash = await md5(item.key, f, BLOCK_SIZE)
+    const r = await api.multipart(total, hash)
 
-        snap.uploadedSize += f.size
-
-        // 直接完成
-        api.complete({
-          key: r.key,
-          name: f.name,
-          skipped: true,
-          parent,
-          hash
-        })
-      }
-    })
-  }
-
-  async function preput(f: File) {
-    const hash = await md5(f)
-    const r = await api.preput(hash)
-    if ('url' in r) {
-      snap.tasks.push({f, ...r})
-      snap.files.push({
-        key: r.key,
-        uploadedSize: 0,
-        total: f.size,
-        name: f.name
-      })
+    if ('uploadId' in r) {
+      const {key, uploadId, urls} = r
+      item.key = key
+      item.uploadId = uploadId
+      item.parts = []
+      snap.tasks.push(...urls.map((url, i) => ({i, f, url, key, uploadId})))
     } else {
-      snap.files.push({
-        uploadedSize: f.size,
-        total: f.size,
-        name: f.name,
-        key: r.key,
-        skipped: true
-      })
-
+      item.key = r.key
+      item.skipped = true
+      item.uploadedSize += f.size
       snap.uploadedSize += f.size
 
       // 直接完成
-      api.complete({
+      await api.complete({
+        key: r.key,
+        name: f.name,
+        skipped: true,
+        parent,
+        hash
+      })
+    }
+  }
+
+  async function preput(item: F) {
+    const f = item.f!
+    delete item.f
+    const hash = await md5(item.key, f)
+    const r = await api.preput(hash)
+    item.key = r.key
+    if ('url' in r) {
+      snap.tasks.push({f, ...r})
+    } else {
+      item.uploadedSize = f.size
+      item.skipped = true
+      snap.uploadedSize += f.size
+
+      // 直接完成
+      await api.complete({
         hash,
         name: f.name,
         skipped: true,
@@ -134,13 +120,22 @@
     for (let i = 0; i < files.length; i++) {
       const f = files.item(i)!
       snap.total += f.size
-      if (f.size > BLOCK_SIZE) multipart(f)
-      else preput(f)
+      snap.files.push({
+        f,
+        uploadedSize: 0,
+        name: f.name,
+        key: crypto.randomUUID(),
+        total: f.size
+      })
+      const item = snap.files.at(-1)!
+      if (f.size > BLOCK_SIZE) multipart(item as Extract<F, {uploadId: string}>)
+      else preput(item)
     }
   }
 
   async function loop(tasks: Q[]) {
     if (!snap.done) return
+    snap.done = false
     while (tasks.length) {
       const _tasks = tasks.splice(0, 10)
       await Promise.all(_tasks.map(async item => {
@@ -161,6 +156,7 @@
             await api.complete({
               key,
               hash,
+              parent,
               name: f.name,
               // @ts-expect-error
               parts: tf.parts,
@@ -169,6 +165,7 @@
             })
           }
         } else {
+          console.log(item.key, snap.files[0].key)
           const tf = snap.files.find(f => f.key === item.key)!
           const hash = await api.put(item.url, item.f)
           snap.uploadedSize += item.f.size
@@ -176,8 +173,9 @@
           tf.hash = hash
           if (tf.uploadedSize === tf.total) {
             await api.complete({
-              key: tf.key,
               hash,
+              parent,
+              key: tf.key,
               name: tf.name,
             })
           }
@@ -185,6 +183,10 @@
       }))
     }
     snap.done = true
+    snap.total = 0
+    snap.uploadedSize = 0
+    snap.files = []
+    onComplete?.(snap.tasks.length === 0)
   }
 
   $effect(() => {
@@ -193,8 +195,7 @@
   })
 
   $effect(() => {
-    const tasks = snap.tasks
-    untrack(() => loop(tasks))
+    if (snap.done && snap.tasks.length) loop(snap.tasks)
   })
 </script>
 

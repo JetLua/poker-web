@@ -3,7 +3,7 @@ import {ObjectId} from 'mongo'
 import {getCookie} from 'hono/cookie'
 import {type CompletedPart} from 's3'
 
-import {aes, db, httpErr} from '~/core/mod.ts'
+import {aes, db, env, httpErr} from '~/core/mod.ts'
 import * as api from '~/api/mod.ts'
 
 // type Env = {
@@ -40,24 +40,31 @@ router.get('/multipart', async c => {
 })
 
 router.post('/complete', async c => {
-  const {uploadId, parts, key, name, parent, hash, skipped} = await c.req.json<{
+  const {uploadId, parts, key, name, parent, skipped} = await c.req.json<{
     key: string
     name: string
     parent?: string
     uploadId: string
     parts?: CompletedPart[]
-    hash?: string
     skipped?: boolean
   }>()
 
   const now = Date.now()
 
   if (skipped) {
+    const {ContentLength: size = 0, ETag} = await api.s3.head({Key: key, Bucket: env.R2_BUCKET})
+
+    if (!ETag) throw httpErr.Bad
+
+    let hash = ETag.replaceAll('"', '')
+    hash = hash.split('-')[0]
+
     await db.file.insertOne({
       key,
       name,
-      hash: hash!,
-      parent,
+      hash,
+      size,
+      parent: parent ?? '',
       createdAt: now,
       updatedAt: now,
       owner: c.var.id,
@@ -77,11 +84,14 @@ router.post('/complete', async c => {
     let hash = r.ETag.replaceAll('"', '')
     hash = hash.split('-')[0]
 
+    const {ContentLength: size = 0} = await api.s3.head({Key: key, Bucket: env.R2_BUCKET})
+
     await db.file.insertOne({
       key,
       name,
       hash,
-      parent,
+      size,
+      parent: parent ?? '',
       createdAt: now,
       updatedAt: now,
       owner: c.var.id,
@@ -91,11 +101,18 @@ router.post('/complete', async c => {
     return c.json(true)
   }
 
-  // todo: 验证信息
+  const {ContentLength: size = 0, ETag} = await api.s3.head({Key: key, Bucket: env.R2_BUCKET})
+
+  if (!ETag) throw httpErr.Bad
+
+  let hash = ETag.replaceAll('"', '')
+  hash = hash.split('-')[0]
+
   await db.file.insertOne({
     key,
     name,
-    parent,
+    size,
+    parent: parent ?? '',
     hash: hash!,
     type: db.FileType.File,
     owner: c.var.id,
@@ -132,7 +149,7 @@ router.post('/folder', async c => {
 
   r = await db.file.findOneAndUpdate({_id: _id ?? new ObjectId()}, [{$set: {
     name,
-    parent,
+    parent: parent ?? '',
     type: db.FileType.Folder,
     owner: {$ifNull: ['$owner', c.var.id]},
     createdAt: {$ifNull: ['$createdAt', Date.now()]},
@@ -149,8 +166,8 @@ router.get('/files', async c => {
 
   return c.json(await db.file
     .find(
-      {parent, owner: c.var.id},
-      {projection: {id: '$_id', _id: 0, name: 1, createdAt: 1, updatedAt: 1, parent: 1, type: 1}}
+      {parent: parent ?? '', owner: c.var.id},
+      {projection: {id: '$_id', _id: 0, name: 1, createdAt: 1, updatedAt: 1, parent: 1, type: 1, size: 1}}
     )
     .sort({type: -1, updatedAt: -1})
     .skip(cursor * size)

@@ -38,8 +38,8 @@ export function info() {
 }
 
 export namespace file {
-  export function set(name: string, id?: string) {
-    return n.post<null, boolean>('/auth/folder', {name, id})
+  export function set(opts: {name: string, id?: string, parent?: string}) {
+    return n.post<null, boolean>('/auth/folder', opts)
   }
 
   export function get(opts?: {

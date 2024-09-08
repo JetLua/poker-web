@@ -16,17 +16,27 @@ export function ok<T>(data: T): [T, null] {
   return [data, null]
 }
 
-export async function md5(f: File, bs?: number) {
-  if (bs) {
-    const total = Math.ceil(f.size / bs)
-    const parts = await Promise.all(Array.from({length: total}, async (_, i) => {
-      const p = f.slice(i * bs, (i + 1) * bs)
-      return MD5(lib.WordArray.create(await p.arrayBuffer()))
-    }))
+const es = new Map<string, Function>()
 
-    const s = parts.reduce((p, n) => p.concat(n))
-    return MD5(s).toString()
-  } else {
-    return MD5(lib.WordArray.create(await f.arrayBuffer())).toString()
-  }
+export async function md5(key: string, file: File, bs?: number) {
+  return new Promise<string>(resolve => {
+    w.postMessage({
+      key,
+      file,
+      bs
+    })
+    es.set(key, resolve)
+  })
+}
+
+let w: Worker
+export function initWorker() {
+  if (w) return w
+  w = new Worker('/worker.js')
+  w.addEventListener('message', e => {
+    console.log(e.data)
+    const fn = es.get(e.data.key)!
+    fn(e.data.hash)
+  })
+  return w
 }

@@ -1,17 +1,19 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
+  import {onMount, untrack} from 'svelte'
   import {toast, Toast} from '$lib/sui'
   import * as api from '~/api'
-  import {store} from '~/core'
+  import {initWorker, store} from '~/core'
   import '~/app.css'
   import '$lib/sui/preset.scss'
 
   const {children} = $props()
   const snap = $state({
-    loading: true
+    loading: true,
+    count: [],
   })
 
   onMount(() => {
+    initWorker()
     api.info().then(r => {
       store.user.name = r.name
       store.user.avatar = r.avatar

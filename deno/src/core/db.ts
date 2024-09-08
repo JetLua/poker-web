@@ -26,6 +26,7 @@ export enum FileType {
 export const file = db.collection<{
   name: string
   key: string
+  size?: number
   hash: string
   owner: string
   createdAt: number

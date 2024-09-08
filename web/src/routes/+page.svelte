@@ -1,17 +1,21 @@
 <script lang="ts">
   import dayjs from 'dayjs'
-  import {onMount} from 'svelte'
+  import {onMount, untrack} from 'svelte'
+
+  import {goto} from '$app/navigation'
+  import {page} from '$app/stores'
   import {Button, Input, Checkbox, AsButton, Popover, toast} from '$lib/sui'
   import {Plus, FolderPlus, FileUpload, File, Folder, Dots} from '$lib/sui/icon'
   import * as api from '~/api'
   import {sync, store} from '~/core'
   import Uploader from './Uploader.svelte'
+  import ItemMenu from './ItemMenu.svelte'
 
   // svelte-ignore non_reactive_update
   let input: HTMLInputElement
   let dialog: HTMLDialogElement
 
-  const {user} = store
+  const {user, mem} = store
 
   const snap = $state({
     folderName: '',
@@ -29,13 +33,14 @@
     location.href = r.url
   }
 
-  async function loadFiles() {
-    const r = await sync(api.file.get())
+  async function loadFiles(dir?: string) {
+    const r = await sync(api.file.get({parent: dir || mem.dir.id}))
     if (r[1]) return toast.error(r[1])
     snap.files = r[0]
   }
 
-  async function handle(action: 'dialog:close' | 'dialog:open' | 'folder:create' | 'file:choose') {
+  type Action = 'dialog:close' | 'dialog:open' | 'folder:create' | 'file:choose' | 'to' | 'item:menu'
+  async function handle(action: Action, ...args: any[]) {
     switch (action) {
       case 'dialog:open': {
         snap.popover = false
@@ -51,7 +56,7 @@
 
       case 'folder:create': {
         const fn = snap.folderName?.trim()
-        const r = await sync(api.file.set(fn))
+        const r = await sync(api.file.set({name: fn, parent: mem.dir.id}))
         if (r[1]) return toast.error(r[1].message)
         toast.success('Done')
         handle('dialog:close')
@@ -68,12 +73,39 @@
         }
         break
       }
+
+      case 'to': {
+        mem.dir.id = args[0].id
+        mem.dir.name = args[0].name
+        mem.paths.push(args[0].name)
+        goto(`/?id=${mem.dir.id}`)
+        break
+      }
+
+      case 'item:menu': {
+        args[0].stopPropagation()
+
+        break
+      }
     }
   }
 
-  onMount(() => {
-    loadFiles()
+  $effect(() => {
+    const dir = $page.url.searchParams.get('id') || undefined
+    mem.dir.id = dir ?? ''
+    untrack(() => loadFiles(dir))
   })
+
+  function formatSize(i = 0) {
+    let count = 0
+
+    while (i > 99) {
+      i /= 1000
+      count++
+    }
+
+    return `${i.toPrecision(2)}${['B', 'KB', 'MB', 'GB'][count]}`
+  }
 </script>
 
 {#if user.name}
@@ -85,13 +117,16 @@
     <Button class="text-sm" variant="outlined" bind:ref={snap.newBtn}>New</Button>
   </div>
 
-  {#each snap.files as {name, id, type, createdAt, updatedAt} (id)}
-    <div class="flex items-center w-main m-auto h-12 hover:bg-gray-100 cursor-pointer">
+  {#each snap.files as {name, id, type, updatedAt, size} (id)}
+    <AsButton class="flex items-center w-main m-auto h-12 hover:bg-gray-100 cursor-pointer"
+      onclick={() => type === 2 && handle('to', {name, id})}>
       {#if type === 1}<File/>{:else}<Folder class="stroke-indigo-400"/>{/if}
       <p class="text-sm text-slate-800 flex-1 text-ellipsis overflow-hidden whitespace-nowrap ml-2">{name}</p>
+      {#if type === 1}<p class="text-sm font-[monospace] text-xs text-stone-500 text-slate-800 text-ellipsis overflow-hidden whitespace-nowrap mr-4">{formatSize(size ?? 0)}</p>{/if}
       <span class="text-xs text-stone-500 font-[monospace] mr-4 md:mr-8">{dayjs(updatedAt).format('MM/DD/YYYY HH:mm:ss')}</span>
-      <Button variant="icon"><Dots class="stroke-sky-500"/></Button>
-    </div>
+      <!-- <Button variant="icon" onclick={e => handle('item:menu', e)}><Dots class="stroke-sky-500"/></Button> -->
+      <ItemMenu {type} onClick={e => handle('item:menu', e)}/>
+    </AsButton>
   {/each}
 
   <input type="file" multiple class="hidden" bind:this={input}/>
@@ -122,7 +157,11 @@
 </dialog>
 
 {#if snap.uploadFiles}
-  <Uploader files={snap.uploadFiles}/>
+  <Uploader files={snap.uploadFiles} parent={mem.dir.id}
+    onComplete={ok => {
+      loadFiles()
+      if (ok) snap.uploadFiles = undefined
+    }}/>
 {/if}
 
 <style lang="scss">
