@@ -4,7 +4,7 @@
 
   import {goto} from '$app/navigation'
   import {page} from '$app/stores'
-  import {Button, Input, Checkbox, AsButton, Popover, toast} from '$lib/sui'
+  import {Button, Input, Checkbox, AsButton, Popover, toast, modal} from '$lib/sui'
   import {Plus, FolderPlus, FileUpload, File, Folder, Dots} from '$lib/sui/icon'
   import * as api from '~/api'
   import {sync, store} from '~/core'
@@ -19,6 +19,7 @@
 
   const snap = $state({
     folderName: '',
+    folderNameId: '',
     newBtn: undefined as undefined | HTMLButtonElement,
     popover: false,
     files: [] as yew.File[],
@@ -56,9 +57,19 @@
 
       case 'folder:create': {
         const fn = snap.folderName?.trim()
+        if (!fn) return
+        if (snap.folderNameId) {
+          const r = await sync(api.file.rename({id: snap.folderNameId, name: fn, parent: mem.dir.id}))
+          snap.folderNameId = ''
+          if (r[1]) return toast.error(r[1].message)
+          toast.success('Success')
+          handle('dialog:close')
+          loadFiles()
+          return
+        }
         const r = await sync(api.file.set({name: fn, parent: mem.dir.id}))
         if (r[1]) return toast.error(r[1].message)
-        toast.success('Done')
+        toast.success('Success')
         handle('dialog:close')
         loadFiles()
         break
@@ -106,6 +117,24 @@
 
     return `${i.toPrecision(2)}${['B', 'KB', 'MB', 'GB'][count]}`
   }
+
+  function download(id: string) {
+    toast.success('download')
+  }
+
+  async function del(id: string) {
+    let ok = await modal.warn('Are you sure you want to delete?')
+    if (!ok) return
+    ok = await api.file.del(id)
+    if (!ok) toast.error('Failed')
+    loadFiles()
+    toast.success('Success')
+  }
+
+  function rename(id: string) {
+    snap.folderNameId = id
+    dialog.showModal()
+  }
 </script>
 
 {#if user.name}
@@ -125,7 +154,25 @@
       {#if type === 1}<p class="text-sm font-[monospace] text-xs text-stone-500 text-slate-800 text-ellipsis overflow-hidden whitespace-nowrap mr-4">{formatSize(size ?? 0)}</p>{/if}
       <span class="text-xs text-stone-500 font-[monospace] mr-4 md:mr-8">{dayjs(updatedAt).format('MM/DD/YYYY HH:mm:ss')}</span>
       <!-- <Button variant="icon" onclick={e => handle('item:menu', e)}><Dots class="stroke-sky-500"/></Button> -->
-      <ItemMenu {type} onClick={e => handle('item:menu', e)}/>
+      <ItemMenu {type} onClick={e => handle('item:menu', e)} onAction={action => {
+        switch (action) {
+          case 'download': {
+            download(id)
+            break
+          }
+
+          case 'delete': {
+            del(id)
+            break
+          }
+
+          case 'rename': {
+            snap.folderName = name
+            rename(id)
+            break
+          }
+        }
+      }}/>
     </AsButton>
   {/each}
 

@@ -184,5 +184,21 @@ router.get('/preput', async c => {
   return c.json(await api.s3.uploader.put())
 })
 
+router.post('/rename', async c => {
+  let {id, name} = await c.req.json<{id: string, name: string}>()
+  if (!id || !name) throw httpErr.Bad
+  name = name.trim()
+  if (!name) throw httpErr.new('invalid name')
+  await db.file.findOneAndUpdate({_id: new ObjectId(id)}, {$set: {name}})
+  return c.json(true)
+})
+
+router.delete('/file', async c => {
+  const id = c.req.query('id')
+  if (!id) throw httpErr.Bad
+  await db.file.deleteOne({_id: new ObjectId(id)})
+  return c.json(true)
+})
+
 
 export default router

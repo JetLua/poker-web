@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount, untrack} from 'svelte'
-  import {toast, Toast} from '$lib/sui'
+  import {toast, Toast, Modal} from '$lib/sui'
   import * as api from '~/api'
   import {initWorker, store} from '~/core'
   import '~/app.css'
@@ -30,6 +30,7 @@
 {/if}
 
 <Toast/>
+<Modal/>
 
 
 <style global lang="scss">

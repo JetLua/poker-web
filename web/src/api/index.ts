@@ -50,4 +50,12 @@ export namespace file {
   export function get(params?: any) {
     return n.get<null, any>('/auth/files', {params})
   }
+
+  export function del(id: string) {
+    return n.delete<null, boolean>('/auth/file', {params: {id}})
+  }
+
+  export function rename(opts: {id: string, name: string, parent?: string}) {
+    return n.post<null, boolean>('/auth/rename', opts)
+  }
 }
