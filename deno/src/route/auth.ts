@@ -6,12 +6,6 @@ import {type CompletedPart} from 's3'
 import {aes, db, env, httpErr} from '~/core/mod.ts'
 import * as api from '~/api/mod.ts'
 
-// type Env = {
-//   Variables: {
-//     id: string
-//   }
-// }
-
 const router = new Hono<{
   Variables: {
     /** user object id */
