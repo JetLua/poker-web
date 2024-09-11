@@ -118,8 +118,12 @@
     return `${i.toPrecision(2)}${['B', 'KB', 'MB', 'GB'][count]}`
   }
 
-  function download(id: string) {
-    toast.success('download')
+  async function download(id: string) {
+    const r = await sync(api.file.getDownloadUrl(id))
+    if (r[1]) return toast.error(r[1])
+    const a = document.createElement('a')
+    a.href = r[0]
+    a.click()
   }
 
   async function del(id: string) {

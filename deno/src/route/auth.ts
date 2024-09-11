@@ -200,5 +200,19 @@ router.delete('/file', async c => {
   return c.json(true)
 })
 
+router.get('/download', async c => {
+  const id = c.req.query('id')
+  if (!id) throw httpErr.Bad
+  let r
+  r = await db.file.findOne({_id: new ObjectId(id)})
+  if (!r) throw httpErr.NotFound
+  r = await api.s3.getDownloadUrl({
+    Bucket: env.R2_BUCKET,
+    Key: r.key,
+    ResponseContentDisposition: `attachment; filename=${r.name}`
+  })
+  return c.text(r)
+})
+
 
 export default router

@@ -58,4 +58,8 @@ export namespace file {
   export function rename(opts: {id: string, name: string, parent?: string}) {
     return n.post<null, boolean>('/auth/rename', opts)
   }
+
+  export function getDownloadUrl(id: string) {
+    return n.get<null, string>('/auth/download', {params: {id}})
+  }
 }

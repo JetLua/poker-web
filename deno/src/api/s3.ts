@@ -2,10 +2,9 @@
 import {
   S3Client, ListBucketsCommand, CreateMultipartUploadCommand,
   UploadPartCommand, CompleteMultipartUploadCommand, PutObjectCommand,
-  HeadObjectCommand,
-  type CreateMultipartUploadRequest,
-  type CompletedPart,
-  type HeadObjectCommandInput
+  GetObjectCommand, HeadObjectCommand,
+  type CreateMultipartUploadRequest, type CompletedPart,
+  type HeadObjectCommandInput, type GetObjectCommandInput
 } from 's3'
 import {getSignedUrl} from 'presigner'
 import {env} from '~/core/mod.ts'
@@ -88,4 +87,8 @@ export namespace uploader {
       }))
     }
   }
+}
+
+export function getDownloadUrl(opts: GetObjectCommandInput) {
+  return getSignedUrl(s3, new GetObjectCommand(opts))
 }
