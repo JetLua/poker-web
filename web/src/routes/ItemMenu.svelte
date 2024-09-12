@@ -29,8 +29,8 @@
 <Popover target={snap.btn} bind:visible={snap.popover}>
   <ol class="py-2">
     {#if props.type === 1}<AsButton class="flex items-center cursor-pointer px-2 h-10 leading-10 hover:bg-slate-200 text-sm text-slate-500" onclick={handle} data-id="download"><FileDownload class="stroke-[2] w-5 h-5 mr-1"/><span>Download</span></AsButton>{/if}
-    <AsButton class="flex items-center cursor-pointer px-2 h-10 leading-10 hover:bg-slate-200 text-sm text-slate-500"
-      data-id="share" onclick={handle}><WorldShare class="stroke-[2] w-5 h-5 mr-1"/><span>Share</span></AsButton>
+    <!--<AsButton class="flex items-center cursor-pointer px-2 h-10 leading-10 hover:bg-slate-200 text-sm text-slate-500"
+      data-id="share" onclick={handle}><WorldShare class="stroke-[2] w-5 h-5 mr-1"/><span>Share</span></AsButton>-->
     <AsButton class="flex items-center cursor-pointer px-2 h-10 leading-10 hover:bg-slate-200 text-sm text-slate-500"
       data-id="rename" onclick={handle}><PencilPlus class="stroke-[2] w-5 h-5 mr-1"/><span>Rename</span></AsButton>
     <AsButton class="flex items-center cursor-pointer px-2 h-10 leading-10 hover:bg-slate-200 text-sm text-red-500"

@@ -1,13 +1,14 @@
 <script lang="ts">
   import dayjs from 'dayjs'
   import {onMount, untrack} from 'svelte'
+  import {SvelteURL} from 'svelte/reactivity'
 
   import {goto} from '$app/navigation'
   import {page} from '$app/stores'
   import {Button, Input, Checkbox, AsButton, Popover, toast, modal} from '$lib/sui'
   import {Plus, FolderPlus, FileUpload, File, Folder, Dots} from '$lib/sui/icon'
   import * as api from '~/api'
-  import {sync, store} from '~/core'
+  import {sync, store, delay} from '~/core'
   import Uploader from './Uploader.svelte'
   import ItemMenu from './ItemMenu.svelte'
 
@@ -28,11 +29,6 @@
       createFolder: false
     }
   })
-
-  async function login() {
-    const r = await api.login()
-    location.href = r.url
-  }
 
   async function loadFiles(dir?: string) {
     const r = await sync(api.file.get({parent: dir || mem.dir.id}))
@@ -59,7 +55,9 @@
         const fn = snap.folderName?.trim()
         if (!fn) return
         if (snap.folderNameId) {
+          snap.loading.createFolder = true
           const r = await sync(api.file.rename({id: snap.folderNameId, name: fn, parent: mem.dir.id}))
+          snap.loading.createFolder = false
           snap.folderNameId = ''
           if (r[1]) return toast.error(r[1].message)
           toast.success('Success')
@@ -67,7 +65,9 @@
           loadFiles()
           return
         }
+        snap.loading.createFolder = true
         const r = await sync(api.file.set({name: fn, parent: mem.dir.id}))
+        snap.loading.createFolder = false
         if (r[1]) return toast.error(r[1].message)
         toast.success('Success')
         handle('dialog:close')
@@ -141,14 +141,13 @@
   }
 </script>
 
-{#if user.name}
-  <div class="flex justify-between items-center border-b border-dashed border-pink-500 w-main m-auto text-purple-500 pb-2">
-    <div class="flex items-center">
-      <img class="w-10 border-2 border-solid border-fuchsia-400 rounded-full mr-2" src={user.avatar} alt="avatar"/>
-      <span>Hi, {user.name}</span>
-    </div>
-    <Button class="text-sm" variant="outlined" bind:ref={snap.newBtn}>New</Button>
+<div class="flex justify-between items-center border-b border-dashed border-pink-500 w-main m-auto text-purple-500 pb-2">
+  <div class="flex items-center">
+    <img class="w-10 border-2 border-solid border-fuchsia-400 rounded-full mr-2" src={user.avatar} alt="avatar"/>
+    <span>Hi, {user.name}</span>
   </div>
+  <Button class="text-sm" variant="outlined" bind:ref={snap.newBtn}>New</Button>
+</div>
 
   {#each snap.files as {name, id, type, updatedAt, size} (id)}
     <AsButton class="flex items-center w-main m-auto h-12 hover:bg-gray-100 cursor-pointer"
@@ -193,16 +192,14 @@
       </AsButton>
     </div>
   </Popover>
-{:else}
-  <Button variant="outlined" onclick={login}>Google</Button>
-{/if}
+
 
 <dialog bind:this={dialog} class="rounded-md">
   <div class="bg-white p-4 rounded-md">
     <Input placeholder="Folder name" class="w-[20rem]" bind:value={snap.folderName}/>
     <div class="flex justify-end mt-2">
       <Button variant="text" class="text-sm" onclick={() => handle('dialog:close')}>cancel</Button>
-      <Button variant="text" class="text-sm" onclick={() => handle('folder:create')}>ok</Button>
+      <Button variant="text" class="text-sm" onclick={() => handle('folder:create')} loading={snap.loading.createFolder}>ok</Button>
     </div>
   </div>
 </dialog>

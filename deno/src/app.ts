@@ -1,9 +1,10 @@
 import {Hono} from 'hono'
 import {cors} from 'hono/cors'
+import {ObjectId} from 'mongo'
 import {crypto} from 'jsr:@std/crypto'
 import {setCookie} from 'hono/cookie'
 import {HTTPException} from 'hono/http-exception'
-import {env, httpErr, kv, db, aes} from '~/core/mod.ts'
+import {env, httpErr, kv, db, aes, laxiaKv} from '~/core/mod.ts'
 import * as api from '~/api/mod.ts'
 
 const app = new Hono()
@@ -82,7 +83,33 @@ app.get('/oauth', async c => {
 
   await kv.delete([state])
 
-  return c.html(`<script>location.href="http://localhost:5173"</script><body>Success</body>`)
+  return c.html(`<script>location.href="${env.WEBSITE}"</script><body>Success</body>`)
+})
+
+app.post('/tg/download', async c => {
+  const {uri} = await c.req.json<{uri: string}>()
+  const r = await fetch(uri).then(r => r.arrayBuffer())
+  return c.text(await api.s3.uploader.put(r as any))
+})
+
+app.get('/tg/q', async c => {
+  const k = c.req.query('key')
+  if (!k) throw httpErr.Bad
+  let r
+  r = await laxiaKv.get<string>([k])
+  if (!r || !r.value) return c.json(false)
+  r = await db.user.findOne({_id: new ObjectId(r.value)})
+  if (!r) throw httpErr.NotFound
+  setCookie(c, 'token', await aes.encode(`${r._id}:${Date.now()}`), {
+    // 一个月
+    maxAge: 2592000,
+    sameSite: 'None',
+    secure: true,
+    path: '/',
+    httpOnly: true,
+  })
+  await laxiaKv.delete([k])
+  return c.json(true)
 })
 
 Deno.serve(app.fetch)

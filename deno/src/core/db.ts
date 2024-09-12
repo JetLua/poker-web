@@ -16,6 +16,11 @@ export const user = db.collection<{
     name: string
     avatar: string
   }
+  telegram: {
+    id: number
+    name: string
+    avatar: string
+  }
 }>('user')
 
 export enum FileType {

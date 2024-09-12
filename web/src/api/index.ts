@@ -63,3 +63,7 @@ export namespace file {
     return n.get<null, string>('/auth/download', {params: {id}})
   }
 }
+
+export function tgq(key: string) {
+  return n.get<null, boolean>('/tg/q', {params: {key}})
+}

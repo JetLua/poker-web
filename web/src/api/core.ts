@@ -5,10 +5,6 @@ const n = axios.create({
   withCredentials: true
 })
 
-// n.interceptors.request.use(r => {
-//   r.headers.c
-// })
-
 n.interceptors.response.use(r => {
   return r.data
 }, async ({response, message}) => {

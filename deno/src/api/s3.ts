@@ -4,7 +4,8 @@ import {
   UploadPartCommand, CompleteMultipartUploadCommand, PutObjectCommand,
   GetObjectCommand, HeadObjectCommand,
   type CreateMultipartUploadRequest, type CompletedPart,
-  type HeadObjectCommandInput, type GetObjectCommandInput
+  type HeadObjectCommandInput, type GetObjectCommandInput,
+  type PutObjectCommandInput
 } from 's3'
 import {getSignedUrl} from 'presigner'
 import {env} from '~/core/mod.ts'
@@ -77,13 +78,24 @@ export namespace uploader {
     }))
   }
 
-  export async function put() {
-    const key = crypto.randomUUID()
+  export async function put(): Promise<{key: string, url: string}>
+  export async function put(body: PutObjectCommandInput['Body']): Promise<string>
+  export async function put(body?: PutObjectCommandInput['Body']): Promise<any> {
+    const key = `disk/${crypto.randomUUID()}`
+    if (body) {
+      await s3.send(new PutObjectCommand({
+        Key: key,
+        Bucket: 'yake',
+        Body: body
+      }))
+      return `https://static.yake.app/${key}`
+    }
     return {
       key,
       url: await getSignedUrl(s3, new PutObjectCommand({
         Bucket: env.R2_BUCKET,
-        Key: key
+        Key: key,
+        Body: undefined
       }))
     }
   }
