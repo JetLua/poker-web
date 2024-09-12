@@ -4,7 +4,7 @@ import {ObjectId} from 'mongo'
 import {crypto} from 'jsr:@std/crypto'
 import {setCookie} from 'hono/cookie'
 import {HTTPException} from 'hono/http-exception'
-import {env, httpErr, kv, db, aes, laxiaKv} from '~/core/mod.ts'
+import {env, httpErr, kv, db, aes, redis} from '~/core/mod.ts'
 import * as api from '~/api/mod.ts'
 
 const app = new Hono()
@@ -79,6 +79,7 @@ app.get('/oauth', async c => {
     secure: true,
     path: '/',
     httpOnly: true,
+    domain: '.yake.app'
   })
 
   await kv.delete([state])
@@ -96,9 +97,9 @@ app.get('/tg/q', async c => {
   const k = c.req.query('key')
   if (!k) throw httpErr.Bad
   let r
-  r = await laxiaKv.get<string>([k])
-  if (!r || !r.value) return c.json(false)
-  r = await db.user.findOne({_id: new ObjectId(r.value)})
+  r = await redis.get(k)
+  if (!r) return c.json(false)
+  r = await db.user.findOne({_id: new ObjectId(r)})
   if (!r) throw httpErr.NotFound
   setCookie(c, 'token', await aes.encode(`${r._id}:${Date.now()}`), {
     // 一个月
@@ -107,8 +108,9 @@ app.get('/tg/q', async c => {
     secure: true,
     path: '/',
     httpOnly: true,
+    domain: '.yake.app'
   })
-  await laxiaKv.delete([k])
+  await redis.del(k)
   return c.json(true)
 })
 

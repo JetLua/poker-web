@@ -4,7 +4,7 @@ import {decodeHex, encodeHex} from 'encoding/hex'
 import * as env from './env.ts'
 
 export const kv = await Deno.openKv()
-export const laxiaKv = await Deno.openKv('https://api.deno.com/databases/3acf5501-7de1-4ff5-b936-cf17db8b5c36/connect')
+export {default as redis} from './redis.ts'
 
 export * as env from './env.ts'
 
