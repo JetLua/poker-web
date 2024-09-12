@@ -49,7 +49,7 @@
   {@render children()}
 </div>
 {:else}
-  <div class="flex flex-col w-[40rem] m-auto pt-4">
+  <div class="flex flex-col  max-w-[40rem] w-full m-auto pt-4 px-4">
     <p class="bg-indigo-50 text-indigo-500 rounded-md text-center leading-10">You can quickly sign in using the following methods</p>
     <div class="flex items-center justify-center gap-x-2 mt-4">
       <Button textColor="#e91e63" variant="outlined" onclick={login} data-id="google">Google</Button>
