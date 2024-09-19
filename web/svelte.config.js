@@ -8,6 +8,9 @@ const config = {
     typescript: true,
     postcss: true,
     scss: {
+      api: 'modern',
+      // 将来可以删掉吧
+      silenceDeprecations: ['legacy-js-api'],
       importer: [
         alias
       ],

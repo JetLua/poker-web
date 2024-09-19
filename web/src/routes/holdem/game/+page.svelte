@@ -1,3 +1,3 @@
 <div>
-  entry
+  game
 </div>

@@ -6,6 +6,11 @@ export default defineConfig({
 	plugins: [
 		sveltekit()
 	],
+	css: {
+		preprocessorOptions: {
+			scss: {api: 'modern'}
+		}
+	},
 	resolve: {
 		preserveSymlinks: false,
 		alias: {

@@ -10,4 +10,9 @@
   .w-main {
     @apply max-w-[1080px] w-full;
   }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }

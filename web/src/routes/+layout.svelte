@@ -3,7 +3,7 @@
   const {children} = $props()
 </script>
 
-<div>
+<div class="px-4">
   {@render children()}
 </div>
 
