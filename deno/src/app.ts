@@ -11,9 +11,6 @@ app.onError((err, c) => {
   return c.json(err.message, 500)
 })
 
-app.use(cors({credentials: true, origin: o => o}))
-
-
 const rooms = new Map<string, Room>()
 
 app.get('/ws', upgradeWebSocket(c => {
@@ -21,6 +18,7 @@ app.get('/ws', upgradeWebSocket(c => {
 
   return {
     onOpen(_, ws) {
+      ws.send('123')
       if (rid) {
 
       } else {
@@ -35,5 +33,7 @@ app.get('/ws', upgradeWebSocket(c => {
     }
   }
 }))
+
+app.use(cors({credentials: true, origin: o => o}))
 
 Deno.serve(app.fetch)
