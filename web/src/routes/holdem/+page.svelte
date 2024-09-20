@@ -1,6 +1,7 @@
 <script lang="ts">
-  import {Button} from '$lib/sui'
-    import {EyeOff, Lock} from '~/lib/sui/icon'
+  import {goto} from '$app/navigation'
+  import {Button, AsButton} from '$lib/sui'
+  import {EyeOff, Lock} from '~/lib/sui/icon'
 
   const snap = $state({
     desktops: [{
@@ -19,6 +20,14 @@
       password: false
     }]
   })
+
+  function onVisit(id: string) {
+    goto(`/holdem/game?id=${id}&action=visit`)
+  }
+
+  function onJoin(id: string) {
+    goto(`/holdem/game?id=${id}&action=join`)
+  }
 </script>
 
 <div class="m-auto w-main">
@@ -35,7 +44,7 @@
 </div>
 
 {#snippet desktop(data: typeof snap.desktops[number], opts: {joinable: boolean})}
-  <div class="group w-full aspect-square rounded-lg bg-slate-400 flex flex-col justify-end bg-[url(/game/desktop.webp)] bg-center bg-cover bg-no-repeat overflow-hidden cursor-pointer relative">
+  <div class="group w-full aspect-square rounded-lg bg-slate-400 flex flex-col justify-end bg-[url(/game/desktop.webp)] bg-center bg-cover bg-no-repeat overflow-hidden relative">
     {#if data.password}
       <Lock class="stroke-white stroke-[2px] absolute top-2 right-2"/>
     {/if}
@@ -49,9 +58,17 @@
 
     {#if opts.joinable || data.visitable}
       <div class="backdrop-blur w-full h-full absolute transition-transform translate-y-[100%] group-hover:translate-y-0 flex flex-col items-center justify-center gap-y-2">
-        <p class="text-white font-bold px-4 h-8 leading-8 hover:bg-fuchsia-400 hover:rounded-[2.5rem]">Visit</p>
-        <p class="h-[1px] w-10 border border-solid border-white"></p>
-        <p class="text-white font-bold px-4 h-8 leading-8 hover:bg-lime-500 hover:rounded-[2.5rem]">Join</p>
+        <AsButton
+          onclick={() => onVisit(data.id)}
+          class="text-white font-bold px-4 h-8 leading-8 hover:bg-fuchsia-400 hover:rounded-[2.5rem] cursor-pointer"
+        >Visit</AsButton>
+        {#if opts.joinable}
+          <p class="h-[1px] w-10 border border-solid border-white"></p>
+          <AsButton
+            onclick={() => onJoin(data.id)}
+            class="text-white font-bold px-4 h-8 leading-8 hover:bg-lime-500 hover:rounded-[2.5rem] cursor-pointer"
+          >Join</AsButton>
+        {/if}
       </div>
     {/if}
     </div>

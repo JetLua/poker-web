@@ -5,8 +5,7 @@
     "mongo": "npm:mongodb@latest",
     "redis": "npm:ioredis@latest",
     "encoding": "jsr:@std/encoding",
-    "presigner": "npm:@aws-sdk/s3-request-presigner@latest",
-    "s3": "npm:@aws-sdk/client-s3@latest",
+    "valtio": "npm:valtio@latest",
     "~/": "./src/"
   },
   "tasks": {
@@ -25,7 +24,6 @@
       "deno.window",
       "deno.unstable"
     ],
-    "types": [],
     "jsx": "precompile",
     "jsxImportSource": "hono/jsx"
   },

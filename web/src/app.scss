@@ -15,4 +15,8 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
+  .monospace {
+    @apply font-[monospace];
+  }
 }

@@ -17,19 +17,8 @@ declare global {
 	}
 
 	namespace yew {
-		enum FileType {
-			File = 1,
-			Dir = 2
-		}
-
-		interface File {
-			parent?: string
-			id: string
-			name: string
-			size?: number
-			type: FileType
-			createdAt: number
-			updatedAt: number
+		interface Player {
+			banker: boolean
 		}
 	}
 }

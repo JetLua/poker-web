@@ -3,6 +3,8 @@ import {decodeBase64} from 'encoding/base64'
 import {decodeHex, encodeHex} from 'encoding/hex'
 import * as env from './env.ts'
 
+export * from './game.ts'
+
 export const kv = await Deno.openKv()
 export {default as redis} from './redis.ts'
 
