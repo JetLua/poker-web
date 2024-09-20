@@ -28,7 +28,7 @@
           <div class="card"></div>
         {/each}
       </div>
-      <div class="flex self-center absolute top-full justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pool: {snap.pool}</div>
+      <div class="flex self-center absolute top-full justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: {snap.pool}</div>
     </div>
 
     {#each snap.players as player, i}
