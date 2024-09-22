@@ -1,5 +1,7 @@
-import {proxy, subscribe} from 'valtio/vanilla'
-import type { WSContext } from 'hono/ws'
+import {proxyMap} from 'valtio/vanilla/utils'
+import {proxy, subscribe, ref} from 'valtio/vanilla'
+
+import type {WSContext} from 'hono/ws'
 
 /**
  * blind: 盲注阶段
@@ -8,6 +10,12 @@ import type { WSContext } from 'hono/ws'
  * flop: 翻牌阶段
  */
 type RoomPhase = 'blind' | 'deal' | 'player' | 'flop'
+
+interface Bet {
+  id: string
+  amount: number
+  allIn: boolean
+}
 
 export class Room {
   id: string
@@ -22,34 +30,56 @@ export class Room {
      * 带上id方便后面计算
      * 平分金额
      */
-    turns: [],
-    players: [] as Array<Player>
+    turns: [] as Bet[][],
+    players: proxyMap<string, Player>()
   })
 
   constructor(opts?: {}) {
     this.id = crypto.randomUUID()
+
     subscribe(this.state, ops => {
       console.log(ops)
     })
   }
 
   add(p: Player) {
-    this.state.players.push(p)
+    this.state.players.set(p.id, p)
   }
 
-  next() {
+  async next() {
 
+  }
+
+  async start() {
+    while (true) {
+      const r = await this.next()
+    }
+  }
+
+  broadcast(data: object) {
+    this.state.players.forEach(p => {
+      p.send(data)
+    })
   }
 }
 
 export class Player {
   id: string
   ws: WSContext
+  chip = 0
 
   constructor(opts: {
     ws: WSContext
     id?: string}) {
     this.id = opts.id ?? crypto.randomUUID()
-    this.ws = opts.ws
+    this.ws = ref(opts.ws)
+  }
+
+  send(data: object) {
+    this.ws.send(this.encode(data))
+  }
+
+  private encode(data: object) {
+    return JSON.stringify(data)
   }
 }
