@@ -22,10 +22,10 @@ class Socket {
   constructor() {
     this.s = new WebSocket(`${import.meta.env.VITE_WS}?pid=123`)
     this.on('message', e => {
-      const data = this.decode(e.data) as yew.Msg
+      const data = this.decode(e.data) as yew.RMsg
       switch (data.type) {
         case 'room:create': {
-          this.handles.createRoom?.()
+          this.handles.createRoom?.(data.data)
           break
         }
       }
@@ -50,9 +50,12 @@ class Socket {
   }
 
   createRoom(data: Extract<yew.Msg, {type: 'room:create'}>['data']) {
-    return new Promise(resolve => {
+    return new Promise<boolean>(resolve => {
       this.send({type: 'room:create', data})
       this.handles.createRoom = resolve
+      AbortSignal
+        .timeout(3e3)
+        .addEventListener('abort', () => resolve(false))
     })
   }
 }

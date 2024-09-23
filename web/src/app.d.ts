@@ -1,41 +1,46 @@
 /// <reference types="vite/client" />
 
 declare global {
-	namespace App {
-		// interface Error {}
-		// interface Locals {}
-		// interface PageData {}
-		// interface Platform {}
-	}
+  namespace App {
+    // interface Error {}
+    // interface Locals {}
+    // interface PageData {}
+    // interface Platform {}
+  }
 
-	interface ImportMetaEnv {
-		readonly VITE_BASE_URL: string
-		readonly VITE_WS: string
-	}
+  interface ImportMetaEnv {
+    readonly VITE_BASE_URL: string
+    readonly VITE_WS: string
+  }
 
-	interface ImportMeta {
-		readonly env: ImportMetaEnv
-	}
+  interface ImportMeta {
+    readonly env: ImportMetaEnv
+  }
 
-	namespace yew {
-		interface Player {
-			banker: boolean
-		}
+  namespace yew {
+    interface Player {
+      banker: boolean
+    }
 
-		type Msg = {
-			type: 'room:create'
-			data: {
-				visitable: boolean
-				password?: string
-				capcity: number
-			}
-		} | {
-			type: 'common'
-			data: unknown
-		}
-	}
+    type Msg = {
+      type: 'room:create'
+      data: {
+        visitable: boolean
+        password?: string
+        capcity: number
+      }
+    } | {
+      type: 'common'
+      data: unknown
+    }
+
+    type RMsg = {
+      type: 'room:create'
+      data: boolean
+    }
+  }
 }
 
 
 
-export {}
+export { }

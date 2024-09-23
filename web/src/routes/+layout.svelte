@@ -1,6 +1,8 @@
 <script lang="ts">
+  import {Toast} from '$lib/sui'
   import {room} from '~/core/store.svelte'
   import '~/app.scss'
+
   const {children} = $props()
 
   $effect(() => {
@@ -10,6 +12,8 @@
     }
   })
 </script>
+
+<Toast/>
 
 <div class="px-4">
   {@render children()}

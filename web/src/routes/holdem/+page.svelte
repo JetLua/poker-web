@@ -1,6 +1,6 @@
 <script lang="ts">
   import {goto} from '$app/navigation'
-  import {Button, AsButton, Input, Switch} from '$lib/sui'
+  import {Button, AsButton, Input, Switch, toast} from '$lib/sui'
   import {EyeOff, Lock} from '$lib/sui/icon'
   import {store} from '~/core'
 
@@ -52,12 +52,14 @@
 
   async function createRoom() {
     snap.pending.createRoom = true
-    await store.ws.createRoom({
+    const ok = await store.ws.createRoom({
       capcity: +snap.roomConf.capcity,
       password: snap.roomConf.password,
       visitable: snap.roomConf.visitable
     })
     snap.pending.createRoom = false
+    if (!ok) return toast.error('Create room failed')
+    dialogRef.close()
   }
 </script>
 

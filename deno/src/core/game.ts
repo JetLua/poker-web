@@ -1,5 +1,5 @@
 import {proxyMap} from 'valtio/vanilla/utils'
-import {proxy, subscribe, ref} from 'valtio/vanilla'
+import {proxy, subscribe, ref, snapshot} from 'valtio/vanilla'
 
 import type {WSContext} from 'hono/ws'
 
@@ -33,8 +33,10 @@ export class Room {
      * 平分金额
      */
     turns: [] as Bet[][],
-    players: proxyMap<string, Player>()
+    players: {} as Record<string, Player>
   })
+
+  get id() {return this.state.id}
 
   constructor(opts?: {
     capcity?: number
@@ -45,13 +47,13 @@ export class Room {
     this.state.visitable = opts?.visitable ?? true
     this.state.id = crypto.randomUUID()
 
-    subscribe(this.state, ops => {
-      // console.log(ops)
+    subscribe(this.state, () => {
+      this.broadcast(this.state)
     })
   }
 
   add(p: Player) {
-    this.state.players.set(p.id, p)
+    this.state.players[p.id] = p
   }
 
   async next() {
@@ -65,15 +67,16 @@ export class Room {
   }
 
   broadcast(data: object) {
-    this.state.players.forEach(p => {
-      // p.send(data)
-    })
+    for (const k in this.state.players) {
+      const p = this.state.players[k]
+      p.send({type: 'room:sync', data})
+    }
   }
 }
 
 export class Player {
-  id: string
   ws: WSContext
+  id: string
   chip = 0
 
   constructor(opts: {
@@ -97,5 +100,12 @@ export class Player {
 
   private decode(data: string) {
     return JSON.parse(data)
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      chip: this.chip
+    }
   }
 }

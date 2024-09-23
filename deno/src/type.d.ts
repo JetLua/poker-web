@@ -14,5 +14,8 @@ declare namespace yew {
   type RMsg = {
     type: 'room:create'
     data: boolean
+  } | {
+    type: 'room:sync'
+    data: any
   }
 }
