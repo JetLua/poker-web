@@ -18,9 +18,11 @@ interface Bet {
 }
 
 export class Room {
-  id: string
-
   state = proxy({
+    id: '',
+    capcity: 4,
+    password: '',
+    visitable: true,
     /** 默认小盲金额 */
     DSBA: 10,
     phase: '' as RoomPhase,
@@ -34,11 +36,17 @@ export class Room {
     players: proxyMap<string, Player>()
   })
 
-  constructor(opts?: {}) {
-    this.id = crypto.randomUUID()
+  constructor(opts?: {
+    capcity?: number
+    password?: string
+    visitable?: boolean}) {
+    this.state.capcity = opts?.capcity ?? 4
+    this.state.password = opts?.password ?? ''
+    this.state.visitable = opts?.visitable ?? true
+    this.state.id = crypto.randomUUID()
 
     subscribe(this.state, ops => {
-      console.log(ops)
+      // console.log(ops)
     })
   }
 
@@ -58,7 +66,7 @@ export class Room {
 
   broadcast(data: object) {
     this.state.players.forEach(p => {
-      p.send(data)
+      // p.send(data)
     })
   }
 }
@@ -75,11 +83,19 @@ export class Player {
     this.ws = ref(opts.ws)
   }
 
-  send(data: object) {
+  send(data: yew.RMsg) {
     this.ws.send(this.encode(data))
+  }
+
+  onMessage(data: unknown) {
+
   }
 
   private encode(data: object) {
     return JSON.stringify(data)
+  }
+
+  private decode(data: string) {
+    return JSON.parse(data)
   }
 }

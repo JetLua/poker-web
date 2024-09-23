@@ -1,6 +1,14 @@
 <script lang="ts">
+  import {room} from '~/core/store.svelte'
   import '~/app.scss'
   const {children} = $props()
+
+  $effect(() => {
+    if (room.id) {
+      // 跳转到房间
+
+    }
+  })
 </script>
 
 <div class="px-4">

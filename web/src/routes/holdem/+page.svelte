@@ -2,6 +2,7 @@
   import {goto} from '$app/navigation'
   import {Button, AsButton, Input, Switch} from '$lib/sui'
   import {EyeOff, Lock} from '$lib/sui/icon'
+  import {store} from '~/core'
 
   let dialogRef: HTMLDialogElement
 
@@ -20,7 +21,17 @@
       started: true,
       visitable: true,
       password: false
-    }]
+    }],
+
+    roomConf: {
+      visitable: true,
+      capcity: '4',
+      password: ''
+    },
+
+    pending: {
+      createRoom: false,
+    }
   })
 
   function onVisit(id: string) {
@@ -39,8 +50,14 @@
     dialogRef.close()
   }
 
-  function createRoom() {
-
+  async function createRoom() {
+    snap.pending.createRoom = true
+    await store.ws.createRoom({
+      capcity: +snap.roomConf.capcity,
+      password: snap.roomConf.password,
+      visitable: snap.roomConf.visitable
+    })
+    snap.pending.createRoom = false
   }
 </script>
 
@@ -61,13 +78,37 @@
   <div class="p-4 rounded-md w-[20rem]">
     <div class="flex items-center justify-between">
       <span class="text-teal-500 monospace">Allow watching</span>
-      <Switch checked/>
+      <Switch bind:checked={snap.roomConf.visitable}/>
     </div>
+    <p class="text-sm monospace text-pink-500 mt-4">Capcity(2~10):</p>
+    <Input
+      bind:value={snap.roomConf.capcity}
+      onblur={() => {
+        const v = +snap.roomConf.capcity
+        if (v > 1 && v < 11) snap.roomConf.capcity = `${v | 0}`
+        else snap.roomConf.capcity = '4'
+      }}
+      class="w-full"
+      type="text"
+      placeholder="Default to 4 players if empty"
+    />
     <p class="text-sm monospace text-pink-500 mt-4">Password:</p>
-    <Input class="w-full" type="password" placeholder="Empty means no password required"/>
+    <Input
+      bind:value={snap.roomConf.password}
+      class="w-full"
+      type="password"
+      placeholder="Empty means no password required"
+    />
     <div class="flex items-center mt-4 justify-end">
-      <Button variant="text" class="text-sm" textColor="#999" onclick={cancel}>Cancel</Button>
-      <Button variant="text" class="text-sm" onclick={createRoom}>Create</Button>
+      {#if !snap.pending.createRoom}
+        <Button
+          variant="text"
+          class="text-sm"
+          textColor="#999"
+          onclick={cancel}
+        >Cancel</Button>
+      {/if}
+      <Button variant="text" class="text-sm" onclick={createRoom} loading={snap.pending.createRoom}>Create</Button>
     </div>
   </div>
 </dialog>

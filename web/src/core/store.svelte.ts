@@ -9,16 +9,26 @@ export const mem = $state({
 })
 
 export const room = $state({
+  id: '',
   players: [] as yew.Player[]
 })
 
 class Socket {
   private s: WebSocket
+  private handles = {
+    createRoom: undefined as Function | undefined
+  }
 
   constructor() {
-    this.s = new WebSocket(import.meta.env.VITE_WS)
+    this.s = new WebSocket(`${import.meta.env.VITE_WS}?pid=123`)
     this.on('message', e => {
-      console.log(e.data)
+      const data = this.decode(e.data) as yew.Msg
+      switch (data.type) {
+        case 'room:create': {
+          this.handles.createRoom?.()
+          break
+        }
+      }
     })
   }
 
@@ -27,16 +37,23 @@ class Socket {
     this.s.addEventListener(type, fn)
   }
 
-  send<T>(data: T) {
+  send<T extends yew.Msg>(data: T) {
     this.s.send(this.encode(data))
   }
 
-  encode<T>(data: T) {
+  private encode<T>(data: T) {
     return JSON.stringify(data)
   }
 
-  decode<T>(data: string) {
+  private decode<T>(data: string) {
     return JSON.parse(data) as T
+  }
+
+  createRoom(data: Extract<yew.Msg, {type: 'room:create'}>['data']) {
+    return new Promise(resolve => {
+      this.send({type: 'room:create', data})
+      this.handles.createRoom = resolve
+    })
   }
 }
 

@@ -21,6 +21,18 @@ declare global {
 		interface Player {
 			banker: boolean
 		}
+
+		type Msg = {
+			type: 'room:create'
+			data: {
+				visitable: boolean
+				password?: string
+				capcity: number
+			}
+		} | {
+			type: 'common'
+			data: unknown
+		}
 	}
 }
 
