@@ -28,6 +28,11 @@ class Socket {
           this.handles.createRoom?.(data.data)
           break
         }
+
+        case 'room:sync': {
+          console.log(data)
+          break
+        }
       }
     })
   }

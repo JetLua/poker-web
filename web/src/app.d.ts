@@ -37,6 +37,9 @@ declare global {
     type RMsg = {
       type: 'room:create'
       data: boolean
+    } | {
+      type: 'room:sync'
+      data: unknown
     }
   }
 }
