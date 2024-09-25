@@ -1,15 +1,21 @@
 <script lang="ts">
   import {Toast} from '$lib/sui'
-  import {room} from '~/core/store.svelte'
+  import {page} from '$app/stores'
+  import {room, user} from '~/core/store.svelte'
   import '~/app.scss'
+    import {goto} from '$app/navigation'
 
   const {children} = $props()
 
   $effect(() => {
     if (room.id) {
       // 跳转到房间
-
+      goto(`/game?id=${room.id}`)
     }
+  })
+
+  $effect(() => {
+    localStorage.setItem('mg:user', JSON.stringify($state.snapshot(user)))
   })
 </script>
 

@@ -1,16 +1,34 @@
-export const user = $state({
-  name: '',
-  avatar: ''
-})
+export const user = $state(loadUser())
 
-export const mem = $state({
-  paths: [] as string[],
-  dir: {name: '', id: ''}
-})
+function loadUser() {
+  try {
+    const raw = localStorage.getItem('mg:user')
+    if (!raw) return {
+      id: '',
+      name: '',
+      avatar: ''
+    }
+    return JSON.parse(raw)
+  } catch {
+    return {
+      id: '',
+      name: '',
+      avatar: ''
+    }
+  }
+}
 
-export const room = $state({
+export const room = $state<yew.Room>({
   id: '',
-  players: [] as yew.Player[]
+  type: '' as yew.RoomType,
+  players: {},
+  DSBA: 10,
+  capcity: 4,
+  password: '',
+  phase: '' as yew.RoomPhase,
+  phaseIndex: 0,
+  turns: [],
+  visitable: true
 })
 
 class Socket {
@@ -20,17 +38,31 @@ class Socket {
   }
 
   constructor() {
-    this.s = new WebSocket(`${import.meta.env.VITE_WS}?pid=123`)
+    this.s = new WebSocket(`${import.meta.env.VITE_WS}?pid=${user.id}`)
     this.on('message', e => {
-      const data = this.decode(e.data) as yew.RMsg
-      switch (data.type) {
+      const {type, data} = this.decode(e.data) as yew.RMsg
+      switch (type) {
         case 'room:create': {
-          this.handles.createRoom?.(data.data)
+          this.handles.createRoom?.(data)
           break
         }
 
         case 'room:sync': {
-          console.log(data)
+          room.id = data.id
+          room.password = data.password
+          room.capcity = data.capcity
+          room.DSBA = data.DSBA
+          room.players = data.players
+          room.turns = data.turns
+          room.visitable = data.visitable
+          room.phase = data.phase
+          room.phaseIndex = data.phaseIndex
+          break
+        }
+
+        case 'player:create': {
+          user.id = data.id
+
           break
         }
       }
@@ -52,16 +84,6 @@ class Socket {
 
   private decode<T>(data: string) {
     return JSON.parse(data) as T
-  }
-
-  createRoom(data: Extract<yew.Msg, {type: 'room:create'}>['data']) {
-    return new Promise<boolean>(resolve => {
-      this.send({type: 'room:create', data})
-      this.handles.createRoom = resolve
-      AbortSignal
-        .timeout(3e3)
-        .addEventListener('abort', () => resolve(false))
-    })
   }
 }
 
