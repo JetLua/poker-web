@@ -10,7 +10,7 @@
   $effect(() => {
     if (room.id) {
       // 跳转到房间
-      goto(`/game?id=${room.id}`)
+      // goto(`/game?id=${room.id}`)
     }
   })
 
@@ -43,6 +43,12 @@
   @media (max-width: 640px) {
     :root {
       font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    :root {
+      font-size: 10px;
     }
   }
 </style>

@@ -20,7 +20,9 @@ function loadUser() {
 
 export const room = $state<yew.Room>({
   id: '',
-  type: '' as yew.RoomType,
+  banker: '',
+  cards: [] as yew.Card[],
+  joinable: false,
   players: {},
   DSBA: 10,
   capcity: 4,
@@ -57,6 +59,9 @@ class Socket {
           room.visitable = data.visitable
           room.phase = data.phase
           room.phaseIndex = data.phaseIndex
+          room.cards = data.cards
+          room.banker = data.banker
+          room.joinable = data.joinable
           break
         }
 

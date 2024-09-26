@@ -8,4 +8,8 @@ export namespace room {
     capcity: number}) {
     return n.post<null, boolean>('/room/create', data)
   }
+
+  export function get() {
+    return n.get<null, yew.Room[]>('/room')
+  }
 }

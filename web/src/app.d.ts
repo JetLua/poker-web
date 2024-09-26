@@ -45,11 +45,17 @@ declare global {
       data: {id: string}
     }
 
-    type RoomPhase = 'blind' | 'deal' | 'player' | 'flop'
-    type RoomType = 'holdem'
+    type RoomPhase = 'ready' | 'blind' | 'deal' | 'player' | 'flop'
+
+    interface Card {
+      num: number
+      suit: 'heart' | 'spade' | 'diamond' | 'club'
+    }
 
     interface Room {
-      type: RoomType
+      cards: Card[]
+      /** 庄家id */
+      banker: string
       /** 默认最小盲注 */
       DSBA: number
       capcity: number
@@ -63,6 +69,7 @@ declare global {
       }>
       turns: []
       visitable: boolean
+      joinable: boolean
     }
   }
 }

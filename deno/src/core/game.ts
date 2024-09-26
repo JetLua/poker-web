@@ -9,7 +9,6 @@ export class Player {
   id: string
   chip = 0
   online = true
-  rid?: string
   room?: Room
   owner = false
 
@@ -52,12 +51,13 @@ export class Player {
 }
 
 /**
+ * ready: 准备阶段
  * blind: 盲注阶段
  * deal: 发牌阶段
  * player: 玩家操作阶段
  * flop: 翻牌阶段
  */
-type RoomPhase = 'blind' | 'deal' | 'player' | 'flop'
+type RoomPhase = 'ready' | 'blind' | 'deal' | 'player' | 'flop'
 
 interface Bet {
   id: string
@@ -67,15 +67,16 @@ interface Bet {
 
 export class Room {
   state = proxy({
-    type: 'holdem',
     id: '',
+    cards: [{}, {}, {}, {}, {}],
+    banker: '',
     capcity: 4,
     password: '',
     visitable: true,
     ownerId: '',
     /** 默认小盲金额 */
     DSBA: 10,
-    phase: '' as RoomPhase,
+    phase: 'ready' as RoomPhase,
     phaseIndex: 0,
     /**
      * 每阶段圈数的押注
@@ -83,7 +84,11 @@ export class Room {
      * 平分金额
      */
     turns: [] as Bet[][],
-    players: {} as Record<string, Player>
+    players: {} as Record<string, Player>,
+
+    get joinable() {
+      return Object.keys(this.players).length < this.capcity && this.phase === 'ready'
+    }
   })
 
   get id() {return this.state.id}
@@ -133,5 +138,9 @@ export class Room {
       console.log(k)
       p.send({type: 'room:sync', data})
     }
+  }
+
+  toJSON() {
+    return this.state
   }
 }

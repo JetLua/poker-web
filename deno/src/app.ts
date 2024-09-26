@@ -20,7 +20,6 @@ app.get('/ws', upgradeWebSocket(c => {
         // 已存在
         const player = players.get(pid)!
         player.ws = ws
-        console.log(player.room)
         if (player.room) {
           player.room.broadcast(player.room.state)
         }
