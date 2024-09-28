@@ -1,5 +1,6 @@
 import {resolve} from 'node:path'
-import adapter from '@sveltejs/adapter-static'
+// import adapter from '@sveltejs/adapter-static'
+import adapter from '@sveltejs/adapter-cloudflare'
 import {sveltePreprocess} from 'svelte-preprocess'
 
 /** @type {import('@sveltejs/kit').Config} */
