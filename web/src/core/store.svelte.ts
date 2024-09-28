@@ -1,4 +1,4 @@
-export const user = $state(loadUser())
+export const user = $state<{id: string}>(loadUser())
 
 function loadUser() {
   try {
@@ -33,22 +33,14 @@ export const room = $state<yew.Room>({
   visitable: true
 })
 
-class Socket {
-  private s: WebSocket
-  private handles = {
-    createRoom: undefined as Function | undefined
-  }
+export const socket = {
+  ws: undefined as undefined | WebSocket,
 
-  constructor() {
-    this.s = new WebSocket(`${import.meta.env.VITE_WS}?pid=${user.id}`)
-    this.on('message', e => {
+  connect() {
+    const ws = this.ws = new WebSocket(`${import.meta.env.VITE_WS}`)
+    ws.onmessage = e => {
       const {type, data} = this.decode(e.data) as yew.RMsg
       switch (type) {
-        case 'room:create': {
-          this.handles.createRoom?.(data)
-          break
-        }
-
         case 'room:sync': {
           room.id = data.id
           room.password = data.password
@@ -62,34 +54,23 @@ class Socket {
           room.cards = data.cards
           room.banker = data.banker
           room.joinable = data.joinable
-          break
-        }
-
-        case 'player:create': {
-          user.id = data.id
-
+          console.log(data)
           break
         }
       }
-    })
-  }
-
-  on(type: 'message', fn: (e: MessageEvent) => void): void
-  on(type: keyof WebSocketEventMap, fn: (e: any) => void) {
-    this.s.addEventListener(type, fn)
-  }
+    }
+  },
 
   send<T extends yew.Msg>(data: T) {
-    this.s.send(this.encode(data))
-  }
+    if (!this.ws) return
+    this.ws.send(this.encode(data))
+  },
 
-  private encode<T>(data: T) {
+  encode<T>(data: T) {
     return JSON.stringify(data)
-  }
+  },
 
-  private decode<T>(data: string) {
+  decode<T>(data: string) {
     return JSON.parse(data) as T
   }
 }
-
-export const ws = new Socket()

@@ -23,11 +23,13 @@
   })
 
   function onVisit(id: string) {
-    goto(`/game?id=${id}&action=visit`)
+    // goto(`/game?id=${id}&action=visit`)
   }
 
-  function onJoin(id: string) {
-    goto(`/game?id=${id}&action=join`)
+  async function onJoin(id: string) {
+    const r = await sync(api.room.join(id))
+    if (r[1]) return toast.error(r[1])
+    goto(`/game?id=${id}`)
   }
 
   function showModal() {

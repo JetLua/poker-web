@@ -1,11 +1,19 @@
 <script lang="ts">
+  import {onMount} from 'svelte'
   import {Toast} from '$lib/sui'
-  import {page} from '$app/stores'
-  import {room, user} from '~/core/store.svelte'
+  // import {page} from '$app/stores'
+  import {goto} from '$app/navigation'
+  import {room, user, socket} from '~/core/store.svelte'
+  import * as api from '~/api'
+
   import '~/app.scss'
-    import {goto} from '$app/navigation'
 
   const {children} = $props()
+
+  const snap = $state({
+    loading: true,
+    err: undefined as undefined | Error
+  })
 
   $effect(() => {
     if (room.id) {
@@ -17,12 +25,29 @@
   $effect(() => {
     localStorage.setItem('mg:user', JSON.stringify($state.snapshot(user)))
   })
+
+  onMount(() => {
+    api.login().then(data => {
+      snap.loading = false
+      user.id = data.id
+      socket.connect()
+    }).catch(() => {
+      snap.loading = false
+      snap.err = new Error('Oops!')
+    })
+  })
 </script>
 
 <Toast/>
 
 <div class="px-4">
-  {@render children()}
+  {#if snap.loading}
+    loading
+  {:else if snap.err}
+    {snap.err.message}
+  {:else}
+    {@render children()}
+  {/if}
 </div>
 
 
