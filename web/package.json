@@ -1,6 +1,7 @@
 {
 	"name": "astro",
 	"version": "0.0.1",
+	"packageManager": "pnpm@9.11.0",
 	"scripts": {
 		"dev": "vite dev --host",
 		"build": "vite build",

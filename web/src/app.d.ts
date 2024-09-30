@@ -60,12 +60,16 @@ declare global {
       DSBA: number
       capcity: number
       id: string
+      ownerId: string
       password: string
       phase: RoomPhase
       phaseIndex: number
       players: Record<string, {
         id: string
         chip: number
+        index: number
+        name: string
+        avatar?: string
       }>
       turns: []
       visitable: boolean

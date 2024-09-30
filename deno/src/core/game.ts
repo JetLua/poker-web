@@ -12,6 +12,7 @@ export class Player {
   state = proxy({
     id: '',
     name: '',
+    index: 0,
     avatar: undefined as undefined | string,
     chip: 0,
     online: false,
@@ -21,6 +22,12 @@ export class Player {
   set id(v: string) {this.state.id = v}
   get online() {return this.state.online}
   set online(v: boolean) {this.state.online = v}
+  get name() {return this.state.name}
+  set name(v: string) {this.state.name = v}
+  get avatar() {return this.state.avatar}
+  set avatar(v: string | undefined) {this.state.avatar = v}
+  get index() {return this.state.index}
+  set index(v: number) {this.state.index = v}
 
   constructor(opts: {
     ws?: WSContext
@@ -102,6 +109,8 @@ export class Room {
   visitors = [] as Player[]
 
   get id() {return this.state.id}
+  get players() {return this.state.players}
+  get playersCount() {return Object.keys(this.players).length}
 
   constructor(opts: {
     owner: Player
@@ -112,10 +121,9 @@ export class Room {
     this.state.password = opts.password ?? ''
     this.state.visitable = opts.visitable ?? true
     this.state.id = crypto.randomUUID()
-    this.state.players[opts.owner.id] = opts.owner
 
-    this.broadcast(this.state)
     this.add(opts.owner, true)
+    this.broadcast(this.state)
 
     subscribe(this.state, () => {
       this.broadcast(this.state)
@@ -123,9 +131,12 @@ export class Room {
   }
 
   add(p: Player, owner?: boolean) {
+    if (p.id in this.players) return
     if (owner) this.state.ownerId = p.id
+    console.log(owner)
     p.room = this
-    this.state.players[p.id] = p
+    p.index = this.playersCount
+    this.players[p.id] = p
   }
 
   addVisitor(p: Player) {

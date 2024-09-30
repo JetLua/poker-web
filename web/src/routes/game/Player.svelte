@@ -2,19 +2,24 @@
   import clsx from 'clsx'
   import {onMount} from 'svelte'
   import {slide} from 'svelte/transition'
-  import {delay} from '~/core'
+  import {delay, store} from '~/core'
+  import {Key} from '$lib/sui/icon'
 
   interface Props {
     index: number
     r: number
     total: number
     banker: boolean
+    owner: boolean
+    data: yew.Room['players'][number]
   }
 
-  const {index, r, total, banker}: Props = $props()
+  const {index, r, total, data, banker, owner}: Props = $props()
 
   const pos = $derived.by(() => {
     const rad = Math.PI * 2 / total * index
+
+    console.log(index, data.index)
 
     const x = Math.sin(rad) * r
     const y = Math.cos(rad) * r
@@ -29,6 +34,8 @@
       bet = true
     })
   })
+
+
 </script>
 
 <div class="root w-fit h-fit m-auto absolute top-0 left-0 right-0 bottom-0 flex flex-col items-center"
@@ -44,7 +51,11 @@
     <div class="card"></div>
   </div>
   <div class="relative w-12 border-2 border-solid border-white aspect-square rounded-full bg-indigo-500 mt-2"></div>
-  <p class="flex items-center justify-center mt-1">{#if banker}<img class="w-2.5 mr-2" src="/game/banker.png" alt="banker"/>{/if}<span class="monospace">Guest</span></p>
+  <p class="flex items-center justify-center mt-1">
+    {#if banker}<img class="w-2.5 mr-2" src="/game/banker.png" alt="banker"/>{/if}
+    {#if owner}<Key class="stroke-[2px]"/>{/if}
+    <span class="monospace">{data.name || `Player_${data.index}`}</span>
+  </p>
 </div>
 
 <style lang="scss">

@@ -20,6 +20,7 @@ function loadUser() {
 
 export const room = $state<yew.Room>({
   id: '',
+  ownerId: '',
   banker: '',
   cards: [] as yew.Card[],
   joinable: false,
@@ -54,7 +55,7 @@ export const socket = {
           room.cards = data.cards
           room.banker = data.banker
           room.joinable = data.joinable
-          console.log(data)
+          room.ownerId = data.ownerId
           break
         }
       }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {room} from '~/core/store.svelte'
+  import {room, user} from '~/core/store.svelte'
   import Player from './Player.svelte'
 
   const snap = $state({
@@ -7,6 +7,12 @@
   })
 
   const r = $derived(snap.desktopRef?.offsetWidth ?? 0)
+
+  /**
+   * 当前玩家的座位号
+   * 当前玩家始终绘制在最下面
+   */
+  const ci = $derived(room.players[user.id].index)
 </script>
 
 
@@ -24,7 +30,15 @@
 
     {#each Object.entries(room.players) as [id, player], i (id)}
       {@const total = Object.keys(room.players).length}
-      <Player r={r / 2} index={i} total={total} banker={id === room.banker}/>
+      {console.log(room.ownerId, id)}
+      <Player
+        r={r / 2}
+        index={i - ci}
+        total={total}
+        banker={room.banker === id}
+        data={player}
+        owner={room.ownerId === id}
+      />
     {/each}
   </div>
 </div>

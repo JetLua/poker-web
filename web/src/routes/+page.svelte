@@ -51,6 +51,7 @@
     snap.pending.createRoom = false
     if (r[1]) return toast.error(r[1])
     dialogRef.close()
+    loadRooms()
   }
 
   async function loadRooms() {

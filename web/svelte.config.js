@@ -11,7 +11,7 @@ const config = {
     scss: {
       api: 'modern',
       // 将来可以删掉吧
-      silenceDeprecations: ['legacy-js-api'],
+      // silenceDeprecations: ['legacy-js-api'],
       importer: [
         alias
       ],
