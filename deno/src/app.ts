@@ -38,7 +38,20 @@ app.get('/ws', upgradeWebSocket(c => {
     },
 
     onMessage(e) {
+      const p = players.get(id)
+      if (!p) return
+      const r = p.decode<yew.Msg>(e.data as string)
+      switch (r.type) {
+        case 'game:start': {
+          p.room?.start()
+          break
+        }
 
+        case 'game:bet': {
+
+          break
+        }
+      }
     },
 
     onClose() {

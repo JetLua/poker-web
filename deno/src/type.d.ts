@@ -1,4 +1,5 @@
 declare namespace yew {
+  // 收到的消息
   type Msg = {
     type: 'room:create'
     data: {
@@ -9,8 +10,18 @@ declare namespace yew {
   } | {
     type: 'common'
     data: unknown
+  } | {
+    type: 'game:start'
+  } | {
+    type: 'game:bet'
+    data: {
+      pid: string
+      num: number
+
+    }
   }
 
+  // reponse msg
   type RMsg = {
     type: 'room:create'
     data: boolean

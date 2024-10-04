@@ -4,6 +4,7 @@
   import {slide} from 'svelte/transition'
   import {delay, store} from '~/core'
   import {Key} from '$lib/sui/icon'
+  import {Button} from '$lib/sui'
 
   interface Props {
     index: number
@@ -19,23 +20,15 @@
   const pos = $derived.by(() => {
     const rad = Math.PI * 2 / total * index
 
-    console.log(index, data.index)
-
     const x = Math.sin(rad) * r
     const y = Math.cos(rad) * r
 
     return [x, y, rad / Math.PI * -180]
   })
 
+  const room = store.room
+
   let bet = $state(false)
-
-  onMount(() => {
-    delay(1).then(() => {
-      bet = true
-    })
-  })
-
-
 </script>
 
 <div class="root w-fit h-fit m-auto absolute top-0 left-0 right-0 bottom-0 flex flex-col items-center"
@@ -56,6 +49,11 @@
     {#if owner}<Key class="stroke-[2px]"/>{/if}
     <span class="monospace">{data.name || `Player_${data.index}`}</span>
   </p>
+
+  <!-- 如果是房主且可以开始 -->
+  {#if owner && room.playersCount > 1}
+    <Button class="text-xs mt-2" variant="outlined">Start</Button>
+  {/if}
 </div>
 
 <style lang="scss">

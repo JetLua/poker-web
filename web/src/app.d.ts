@@ -71,6 +71,7 @@ declare global {
         name: string
         avatar?: string
       }>
+      playersCount: number
       turns: []
       visitable: boolean
       joinable: boolean

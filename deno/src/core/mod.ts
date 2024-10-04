@@ -6,7 +6,6 @@ import * as env from './env.ts'
 export * from './game.ts'
 
 export const kv = await Deno.openKv()
-export {default as redis} from './redis.ts'
 
 export * as env from './env.ts'
 

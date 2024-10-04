@@ -56,8 +56,8 @@ export class Player {
     return JSON.stringify(data)
   }
 
-  private decode(data: string) {
-    return JSON.parse(data)
+  decode<T>(data: string) {
+    return JSON.parse(data) as T
   }
 
   toJSON() {
@@ -67,12 +67,11 @@ export class Player {
 
 /**
  * ready: 准备阶段
- * blind: 盲注阶段
  * deal: 发牌阶段
  * player: 玩家操作阶段
  * flop: 翻牌阶段
  */
-type RoomPhase = 'ready' | 'blind' | 'deal' | 'player' | 'flop'
+type RoomPhase = 'ready' | 'deal' | 'player' | 'flop'
 
 interface Bet {
   id: string
@@ -103,6 +102,10 @@ export class Room {
 
     get joinable() {
       return Object.keys(this.players).length < this.capcity && this.phase === 'ready'
+    },
+
+    get playersCount() {
+      return Object.keys(this.players).length
     }
   })
 
@@ -110,7 +113,6 @@ export class Room {
 
   get id() {return this.state.id}
   get players() {return this.state.players}
-  get playersCount() {return Object.keys(this.players).length}
 
   constructor(opts: {
     owner: Player
@@ -133,9 +135,9 @@ export class Room {
   add(p: Player, owner?: boolean) {
     if (p.id in this.players) return
     if (owner) this.state.ownerId = p.id
-    console.log(owner)
+
     p.room = this
-    p.index = this.playersCount
+    p.index = this.state.playersCount
     this.players[p.id] = p
   }
 
@@ -156,13 +158,18 @@ export class Room {
   }
 
   async next() {
-
+    switch (this.state.phase) {
+      case 'ready': {
+        this.state.phase = 'deal'
+        break
+      }
+    }
   }
 
   async start() {
-    while (true) {
-      const r = await this.next()
-    }
+    // while (true) {
+    //   const r = await this.next()
+    // }
   }
 
   broadcast(data: object) {

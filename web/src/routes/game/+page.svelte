@@ -30,14 +30,13 @@
 
     {#each Object.entries(room.players) as [id, player], i (id)}
       {@const total = Object.keys(room.players).length}
-      {console.log(room.ownerId, id)}
       <Player
         r={r / 2}
         index={i - ci}
         total={total}
         banker={room.banker === id}
         data={player}
-        owner={room.ownerId === id}
+        owner={room.ownerId === user.id && id === user.id}
       />
     {/each}
   </div>
