@@ -22,6 +22,7 @@ declare global {
       banker: boolean
     }
 
+    /** 发送的消息 */
     type Msg = {
       type: 'room:create'
       data: {
@@ -30,10 +31,11 @@ declare global {
         capcity: number
       }
     } | {
-      type: 'common'
-      data: unknown
+      type: 'game:start'
+      data?: unknown
     }
 
+    /** 接收的消息 */
     type RMsg = {
       type: 'room:create'
       data: boolean
@@ -45,7 +47,7 @@ declare global {
       data: {id: string}
     }
 
-    type RoomPhase = 'ready' | 'blind' | 'deal' | 'player' | 'flop'
+    type RoomPhase = 'ready' | 'deal' | 'player' | 'flop'
 
     interface Card {
       num: number

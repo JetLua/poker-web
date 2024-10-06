@@ -51,8 +51,10 @@
   </p>
 
   <!-- 如果是房主且可以开始 -->
-  {#if owner && room.playersCount > 1}
-    <Button class="text-xs mt-2" variant="outlined">Start</Button>
+  {#if room.phase === 'ready' && owner && room.playersCount > 1}
+    <Button class="text-xs mt-2" variant="outlined"
+      onclick={() => store.socket.send({type: 'game:start'})}
+    >Start</Button>
   {/if}
 </div>
 

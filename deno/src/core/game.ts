@@ -92,6 +92,7 @@ export class Room {
     DSBA: 10,
     phase: 'ready' as RoomPhase,
     phaseIndex: 0,
+    bankerIndex: 0,
     /**
      * 每阶段圈数的押注
      * 带上id方便后面计算
@@ -157,7 +158,7 @@ export class Room {
     if (i !== -1) this.visitors.splice(i, 1)
   }
 
-  async next() {
+  next() {
     switch (this.state.phase) {
       case 'ready': {
         this.state.phase = 'deal'
@@ -166,10 +167,11 @@ export class Room {
     }
   }
 
-  async start() {
-    // while (true) {
-    //   const r = await this.next()
-    // }
+  start() {
+    // todo: 一些准备工作
+    // 决定谁是庄家：随机
+    this.state.bankerIndex = this.state.playersCount * Math.random() | 0
+    console.log('game:start')
   }
 
   broadcast(data: object) {
