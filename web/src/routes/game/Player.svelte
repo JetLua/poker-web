@@ -11,11 +11,10 @@
     r: number
     total: number
     banker: boolean
-    owner: boolean
-    data: yew.Room['players'][number]
+    data: yew.Room['players'][string]
   }
 
-  const {index, r, total, data, banker, owner}: Props = $props()
+  const {index, r, total, data, banker}: Props = $props()
 
   const pos = $derived.by(() => {
     const rad = Math.PI * 2 / total * index
@@ -27,6 +26,9 @@
   })
 
   const room = store.room
+  const owner = $derived.by(() => {
+    return room.ownerId === data.id
+  })
 
   let bet = $state(false)
 </script>
@@ -46,12 +48,12 @@
   <div class="relative w-12 border-2 border-solid border-white aspect-square rounded-full bg-indigo-500 mt-2"></div>
   <p class="flex items-center justify-center mt-1">
     {#if banker}<img class="w-2.5 mr-2" src="/game/banker.png" alt="banker"/>{/if}
-    {#if owner}<Key class="stroke-[2px]"/>{/if}
+    {#if owner}<Key class="stroke-[2px] mr-2 w-5"/>{/if}
     <span class="monospace">{data.name || `Player_${data.index}`}</span>
   </p>
 
   <!-- 如果是房主且可以开始 -->
-  {#if room.phase === 'ready' && owner && room.playersCount > 1}
+  {#if room.phase === 'ready' && owner && data.id === store.user.id && room.playersCount > 1}
     <Button class="text-xs mt-2" variant="outlined"
       onclick={() => store.socket.send({type: 'game:start'})}
     >Start</Button>

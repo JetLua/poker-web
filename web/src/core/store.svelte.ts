@@ -32,7 +32,8 @@ export const room = $state<yew.Room>({
   phase: '' as yew.RoomPhase,
   phaseIndex: 0,
   turns: [],
-  visitable: true
+  visitable: true,
+  bankerIndex: -1
 })
 
 export const socket = {
@@ -58,6 +59,7 @@ export const socket = {
           room.joinable = data.joinable
           room.ownerId = data.ownerId
           room.playersCount = data.playersCount
+          room.bankerIndex = data.bankerIndex
           break
         }
       }

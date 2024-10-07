@@ -34,9 +34,8 @@
         r={r / 2}
         index={i - ci}
         total={total}
-        banker={room.banker === id}
+        banker={room.bankerIndex === i}
         data={player}
-        owner={room.ownerId === user.id && id === user.id}
       />
     {/each}
   </div>

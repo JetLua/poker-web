@@ -83,7 +83,6 @@ export class Room {
   state = proxy({
     id: '',
     cards: [{}, {}, {}, {}, {}],
-    banker: '',
     capcity: 4,
     password: '',
     visitable: true,
@@ -92,6 +91,7 @@ export class Room {
     DSBA: 10,
     phase: 'ready' as RoomPhase,
     phaseIndex: 0,
+    banker: '',
     bankerIndex: 0,
     /**
      * 每阶段圈数的押注
@@ -171,7 +171,7 @@ export class Room {
     // todo: 一些准备工作
     // 决定谁是庄家：随机
     this.state.bankerIndex = this.state.playersCount * Math.random() | 0
-    console.log('game:start')
+    this.next()
   }
 
   broadcast(data: object) {

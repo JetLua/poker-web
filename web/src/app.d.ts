@@ -58,6 +58,7 @@ declare global {
       cards: Card[]
       /** 庄家id */
       banker: string
+      bankerIndex: number
       /** 默认最小盲注 */
       DSBA: number
       capcity: number
