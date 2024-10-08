@@ -11,7 +11,7 @@ export class Room {
   })
 
   constructor() {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 10; i++) {
       const p = new Player()
       p.state.index = i
       this.state.players[p.state.id] = p
@@ -19,7 +19,7 @@ export class Room {
   }
 }
 
-class Player {
+export class Player {
   state = $state({
     id: '',
     index: 0

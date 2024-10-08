@@ -1,19 +1,56 @@
 <script lang="ts">
+    import {untrack} from 'svelte'
+
   // import {room, user} from '~/core/store.svelte'
   import Player from './NewPlayer.svelte'
-  import {Room} from '~/core/simulator.svelte'
+  import * as simulator from '~/core/simulator.svelte'
 
-  const room = new Room()
+  const room = new simulator.Room()
 
   const snap = $state({
     desktopRef: undefined as undefined | HTMLElement,
+    /** bottom slots */
+    bPlayers: [] as simulator.Player[],
+    /** top slots */
+    tPlayers: [] as simulator.Player[],
+    /** left slots */
+    lPlayers: [] as simulator.Player[],
+    /** right slots */
+    rPlayers: [] as simulator.Player[]
+  })
+
+  $effect(() => {
+    const players = Object.values(room.state.players)
+    players.sort((a, b) => a.state.index - b.state.index)
+    const r = (players.length - 1) % 3
+    const d = (players.length - 1) / 3 | 0
+
+    let tr = d
+    let lr = d
+
+    if (r === 1) tr = d + 1
+    else if (r === 2) lr = d + 1
+
+    untrack(() => {
+      for (const p of players) {
+        if (!snap.bPlayers.length) snap.bPlayers.push(p)
+        else if (snap.lPlayers.length < lr) snap.lPlayers.push(p)
+        else if (snap.tPlayers.length < tr) snap.tPlayers.push(p)
+        else if (snap.rPlayers.length < lr) snap.rPlayers.push(p)
+      }
+    })
   })
 
 
-  for (const k in room.state.players) {
-    const p = room.state.players[k]
-    console.log(p.state.index)
-  }
+
+  // for (const k in room.state.players) {
+  //   const p = room.state.players[k]
+  //   const rad = Math.PI * 2 / room.state.playersCount * p.state.index
+  //   if (!rad) snap.bPlayers.push(p)
+  //   else if (rad >= Math.PI * .25 && rad <= Math.PI * .75) snap.rPlayers.push(p)
+  //   else if (rad >= Math.PI * 1.25 && rad <= Math.PI * 1.75) snap.lPlayers.push(p)
+  //   else snap.tPlayers.push(p)
+  // }
 </script>
 
 
@@ -41,27 +78,40 @@
   </div>
 
   <!-- 上插槽 -->
-  <div class="absolute flex gap-x-2 items-center mx-auto left-0 right-0 top-0 h-fit w-fit bg-indigo-200">
-    <Player/>
-    <Player/>
-    <Player/>
-  </div>
+  {#if snap.tPlayers.length}
+    <div class="absolute flex gap-x-2 items-center mx-auto left-0 right-0 top-0 h-fit w-fit bg-indigo-200">
+      {#each snap.tPlayers as p}
+        <Player data={p.state}/>
+      {/each}
+    </div>
+  {/if}
 
   <!-- 左插槽 -->
-  <div class="absolute gap-y-2 justify-center flex-col flex left-0 top-0 bottom-0 my-auto w-fit h-fit bg-indigo-200">
-    <Player/>
-    <Player/>
-  </div>
+  {#if snap.lPlayers.length}
+    <div class="absolute gap-y-2 justify-center flex-col flex left-0 top-0 bottom-0 my-auto w-fit h-fit bg-indigo-200">
+      {#each snap.lPlayers as p}
+        <Player data={p.state}/>
+      {/each}
+    </div>
+  {/if}
 
   <!-- 右插槽 -->
-  <div class="absolute gap-y-2 justify-center flex-col flex right-0 top-0 bottom-0 my-auto w-fit h-fit bg-indigo-200">
-    <Player/>
-  </div>
+  {#if snap.rPlayers.length}
+    <div class="absolute gap-y-2 justify-center flex-col flex right-0 top-0 bottom-0 my-auto w-fit h-fit bg-indigo-200">
+      {#each snap.rPlayers as p}
+        <Player data={p.state}/>
+      {/each}
+    </div>
+  {/if}
 
   <!-- 下插槽 -->
-  <div class="absolute gap-y-2 justify-center flex-col flex right-0 left-0 bottom-0 mx-auto w-fit h-fit bg-indigo-200">
-    <Player/>
-  </div>
+  {#if snap.bPlayers.length}
+    <div class="absolute gap-y-2 justify-center flex-col flex right-0 left-0 bottom-0 mx-auto w-fit h-fit bg-indigo-200">
+      {#each snap.bPlayers as p}
+        <Player data={p.state}/>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">

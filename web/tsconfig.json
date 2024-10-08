@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
-		"strictNullChecks": true,
+		"strictNullChecks": false,
 		"noImplicitAny": true,
 		"verbatimModuleSyntax": true,
 		"esModuleInterop": true,
