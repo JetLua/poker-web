@@ -162,15 +162,19 @@ export class Room {
     switch (this.state.phase) {
       case 'ready': {
         this.state.phase = 'deal'
+
         break
       }
     }
   }
 
   start() {
+    // 防止重复点击
+    if (this.state.phase !== 'ready') return
     // todo: 一些准备工作
     // 决定谁是庄家：随机
     this.state.bankerIndex = this.state.playersCount * Math.random() | 0
+
     this.next()
   }
 

@@ -41,15 +41,15 @@
     {/if}
   </div>
 
-  <div class="flex gap-2 mt-2">
+  <div class="flex gap-2 mt-2 hidden">
     <div class="card"></div>
     <div class="card"></div>
   </div>
   <div class="relative w-12 border-2 border-solid border-white aspect-square rounded-full bg-indigo-500 mt-2"></div>
   <p class="flex items-center justify-center mt-1">
     {#if banker}<img class="w-2.5 mr-2" src="/game/banker.png" alt="banker"/>{/if}
-    {#if owner}<Key class="stroke-[2px] mr-2 w-5"/>{/if}
-    <span class="monospace">{data.name || `Player_${data.index}`}</span>
+    {#if owner}<Key class="stroke-[2px] mr-2 w-5 stroke-white"/>{/if}
+    <span class="monospace text-white">{data.name || `Player_${data.index}`}</span>
   </p>
 
   <!-- 如果是房主且可以开始 -->

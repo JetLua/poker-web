@@ -73,7 +73,7 @@
 
   @media (max-width: 480px) {
     :root {
-      font-size: 10px;
+      font-size: 12px;
     }
   }
 </style>
