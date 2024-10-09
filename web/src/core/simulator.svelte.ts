@@ -11,7 +11,8 @@ export class Room {
   })
 
   constructor() {
-    for (let i = 0; i < 10; i++) {
+    const total = 10
+    for (let i = 0; i < total; i++) {
       const p = new Player()
       p.state.index = i
       this.state.players[p.state.id] = p
@@ -22,7 +23,8 @@ export class Room {
 export class Player {
   state = $state({
     id: '',
-    index: 0
+    index: 0,
+    cards: [],
   })
 
   constructor() {

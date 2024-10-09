@@ -56,13 +56,13 @@
 
 <div class="root w-screen h-screen bg-indigo-100 m-auto mx-[-1rem] relative">
   <div class="desktop absolute m-auto top-0 left-0 right-0 bottom-0" bind:this={snap.desktopRef}>
-    <div class="flex flex-col w-fit absolute m-auto top-0 left-0 right-0 bottom-0 h-fit gap-2">
+    <div class="flex flex-col gap-2">
       <div class="flex w-fit h-fit gap-2">
         {#each room.state.cards as card, i (i)}
           <div class="card"></div>
         {/each}
       </div>
-      <div class="flex self-center absolute top-full justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: 0</div>
+      <div class="flex self-center justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: 0</div>
     </div>
 
     <!-- {#each Object.entries(room.players) as [id, player], i (id)}
@@ -79,7 +79,7 @@
 
   <!-- 上插槽 -->
   {#if snap.tPlayers.length}
-    <div class="absolute flex gap-x-2 items-center mx-auto left-0 right-0 top-0 h-fit w-fit bg-indigo-200">
+    <div class="absolute flex gap-x-4 items-center mx-auto left-0 right-0 top-0 h-fit w-fit">
       {#each snap.tPlayers as p}
         <Player data={p.state}/>
       {/each}
@@ -88,7 +88,7 @@
 
   <!-- 左插槽 -->
   {#if snap.lPlayers.length}
-    <div class="absolute gap-y-2 justify-center flex-col flex left-0 top-0 bottom-0 my-auto w-fit h-fit bg-indigo-200">
+    <div class="absolute gap-y-4 justify-center flex-col-reverse flex left-0 top-0 bottom-0 my-auto w-fit h-fit">
       {#each snap.lPlayers as p}
         <Player data={p.state}/>
       {/each}
@@ -97,7 +97,7 @@
 
   <!-- 右插槽 -->
   {#if snap.rPlayers.length}
-    <div class="absolute gap-y-2 justify-center flex-col flex right-0 top-0 bottom-0 my-auto w-fit h-fit bg-indigo-200">
+    <div class="absolute gap-y-4 justify-center flex-col flex right-0 top-0 bottom-0 my-auto w-fit h-fit">
       {#each snap.rPlayers as p}
         <Player data={p.state}/>
       {/each}
@@ -106,7 +106,7 @@
 
   <!-- 下插槽 -->
   {#if snap.bPlayers.length}
-    <div class="absolute gap-y-2 justify-center flex-col flex right-0 left-0 bottom-0 mx-auto w-fit h-fit bg-indigo-200">
+    <div class="absolute gap-y-2 justify-center flex-col flex right-0 left-0 bottom-0 mx-auto w-fit h-fit">
       {#each snap.bPlayers as p}
         <Player data={p.state}/>
       {/each}
@@ -120,11 +120,9 @@
   }
 
   .desktop {
-    width: 80%;
-    max-width: 600px;
-    aspect-ratio: 1;
+    width: fit-content;
+    height: fit-content;
     background-color: transparent;
-    border-radius: 50%;
   }
 
   .card {
