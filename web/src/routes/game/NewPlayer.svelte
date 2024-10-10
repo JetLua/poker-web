@@ -2,7 +2,7 @@
   import clsx from 'clsx'
   import {Player, room} from '~/core/simulator.svelte'
   import Card from './Card.svelte'
-  import {Key} from '$lib/sui/icon'
+  import {Key, XboxB} from '$lib/sui/icon'
   import * as store from '~/core/store.svelte'
 
   interface Props {
@@ -25,18 +25,18 @@
     class:left-full={orientation === 'left'}
     class:right-full={orientation === 'right'}
     class:bottom-full={orientation === 'bottom'}
+    class:flex-col={orientation === 'left' || orientation === 'right'}
     class={clsx('absolute flex items-center justify-center', orientation === 'top' || orientation === 'bottom' ? 'w-full h-fit' : 'h-full w-fit')}>
     {#if room.state.owner === data.id}
-      <Key class="stroke-white stroke-2 w-6 block"/>
+      <Key class="stroke-white stroke-2 w-6 h-6 block"/>
+      <XboxB class="stroke-white stroke-2 w-6 h-6 block"/>
     {/if}
 
     {#if room.state.banker === data.id}
-      <img class="w-3" src="/game/banker.png" alt="banker"/>
+      <XboxB class="stroke-white stroke-2 w-6 h-6 block"/>
     {/if}
 
-    {#if store.user.id === data.id}
-      <p>self</p>
-    {/if}
+    <!-- 下注占位符 -->
   </section>
 </div>
 
