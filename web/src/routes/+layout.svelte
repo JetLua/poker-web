@@ -11,7 +11,7 @@
   const {children} = $props()
 
   const snap = $state({
-    loading: true,
+    loading: false,
     err: undefined as undefined | Error
   })
 
@@ -22,20 +22,16 @@
     }
   })
 
-  $effect(() => {
-    localStorage.setItem('mg:user', JSON.stringify($state.snapshot(user)))
-  })
-
-  onMount(() => {
-    api.login().then(data => {
-      snap.loading = false
-      user.id = data.id
-      socket.connect()
-    }).catch(() => {
-      snap.loading = false
-      snap.err = new Error('Oops!')
-    })
-  })
+  // onMount(() => {
+  //   api.login().then(data => {
+  //     snap.loading = false
+  //     user.id = data.id
+  //     socket.connect()
+  //   }).catch(() => {
+  //     snap.loading = false
+  //     snap.err = new Error('Oops!')
+  //   })
+  // })
 </script>
 
 <Toast/>

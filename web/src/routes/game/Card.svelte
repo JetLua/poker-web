@@ -3,12 +3,15 @@
 
   interface Props {
     class?: string
+    num?: number
+    suit?: yew.Suit
+    placeholder?: boolean
   }
 
-  const {class: _class}: Props = $props()
+  const {class: _class, placeholder}: Props = $props()
 </script>
 
-<div class={clsx('card', _class)}>
+<div class={clsx('card', _class, placeholder ? '' : 'bg-[url("/game/card-back.png")] bg-cover bg-center bg-no-repeat !border-none')}>
 
 </div>
 

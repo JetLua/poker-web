@@ -1,4 +1,4 @@
-export const user = $state<{id: string}>(loadUser())
+export const user = $state<{id: string}>({id: ''})
 
 function loadUser() {
   try {

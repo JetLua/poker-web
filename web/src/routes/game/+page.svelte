@@ -1,11 +1,10 @@
 <script lang="ts">
-    import {untrack} from 'svelte'
-
+  import {untrack} from 'svelte'
   // import {room, user} from '~/core/store.svelte'
   import Player from './NewPlayer.svelte'
   import * as simulator from '~/core/simulator.svelte'
 
-  const room = new simulator.Room()
+  const room = simulator.room
 
   const snap = $state({
     desktopRef: undefined as undefined | HTMLElement,
@@ -81,7 +80,10 @@
   {#if snap.tPlayers.length}
     <div class="absolute flex gap-x-4 items-center mx-auto left-0 right-0 top-0 h-fit w-fit">
       {#each snap.tPlayers as p}
-        <Player data={p.state}/>
+        <Player
+          data={p.state}
+          orientation="top"
+        />
       {/each}
     </div>
   {/if}
@@ -90,7 +92,10 @@
   {#if snap.lPlayers.length}
     <div class="absolute gap-y-4 justify-center flex-col-reverse flex left-0 top-0 bottom-0 my-auto w-fit h-fit">
       {#each snap.lPlayers as p}
-        <Player data={p.state}/>
+        <Player
+          data={p.state}
+          orientation="left"
+        />
       {/each}
     </div>
   {/if}
@@ -99,7 +104,10 @@
   {#if snap.rPlayers.length}
     <div class="absolute gap-y-4 justify-center flex-col flex right-0 top-0 bottom-0 my-auto w-fit h-fit">
       {#each snap.rPlayers as p}
-        <Player data={p.state}/>
+        <Player
+          data={p.state}
+          orientation="right"
+        />
       {/each}
     </div>
   {/if}
@@ -108,7 +116,10 @@
   {#if snap.bPlayers.length}
     <div class="absolute gap-y-2 justify-center flex-col flex right-0 left-0 bottom-0 mx-auto w-fit h-fit">
       {#each snap.bPlayers as p}
-        <Player data={p.state}/>
+        <Player
+          data={p.state}
+          orientation="bottom"
+        />
       {/each}
     </div>
   {/if}

@@ -1,6 +1,10 @@
 /// <reference types="vite/client" />
 
 declare global {
+  interface Window {
+    room: any
+  }
+
   namespace App {
     // interface Error {}
     // interface Locals {}
@@ -18,6 +22,11 @@ declare global {
   }
 
   namespace yew {
+    /** 花色 */
+    type Suit = 'heart' | 'spade' | 'diamond' | 'club'
+    /** 方位 */
+    type Orientation = 'top' | 'left' | 'right' | 'bottom'
+
     interface Player {
       banker: boolean
     }
