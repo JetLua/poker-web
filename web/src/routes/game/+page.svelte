@@ -3,6 +3,7 @@
   // import {room, user} from '~/core/store.svelte'
   import Player from './NewPlayer.svelte'
   import * as simulator from '~/core/simulator.svelte'
+    import {store} from '~/core'
 
   const room = simulator.room
 
@@ -30,6 +31,14 @@
     if (r === 1) tr = d + 1
     else if (r === 2) lr = d + 1
 
+    // 重新排序当前用户在第一个
+    const i = players.findIndex(p => p.state.id === store.user.id)
+
+    // 小于 i 的放到后面
+    const parts = players.splice(0, i)
+
+    players.push(...parts)
+
     untrack(() => {
       for (const p of players) {
         if (!snap.bPlayers.length) snap.bPlayers.push(p)
@@ -39,17 +48,6 @@
       }
     })
   })
-
-
-
-  // for (const k in room.state.players) {
-  //   const p = room.state.players[k]
-  //   const rad = Math.PI * 2 / room.state.playersCount * p.state.index
-  //   if (!rad) snap.bPlayers.push(p)
-  //   else if (rad >= Math.PI * .25 && rad <= Math.PI * .75) snap.rPlayers.push(p)
-  //   else if (rad >= Math.PI * 1.25 && rad <= Math.PI * 1.75) snap.lPlayers.push(p)
-  //   else snap.tPlayers.push(p)
-  // }
 </script>
 
 
@@ -63,17 +61,6 @@
       </div>
       <div class="flex self-center justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: 0</div>
     </div>
-
-    <!-- {#each Object.entries(room.players) as [id, player], i (id)}
-      {@const total = Object.keys(room.players).length}
-      <Player
-        r={r / 2}
-        index={i - ci}
-        total={total}
-        banker={room.bankerIndex === i}
-        data={player}
-      />
-    {/each} -->
   </div>
 
   <!-- 上插槽 -->

@@ -58,6 +58,7 @@ export class Player {
   state = $state({
     id: '',
     index: 0,
+    bet: 0,
     cards: [{}, {}],
   })
 

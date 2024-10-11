@@ -18,6 +18,9 @@
     <!-- {#each data.cards as c}
       <Card class="!w-4"/>
     {/each} -->
+    {#if store.user.id === data.id}
+      self
+    {/if}
   </div>
   <p class="leading-none text-sm text-white monospace">9000</p>
   <section
@@ -32,10 +35,12 @@
     {/if}
 
     <!-- 下注占位符 -->
-    <div class="text-sm w-max flex justify-center items-center gap-x-1 shrink-0">
-      <img src="/game/chip.png" class="w-5" alt="chip">
-      <p class="text-white text-sm monospace">90</p>
-    </div>
+    {#if data.bet}
+      <div class="text-sm w-max flex justify-center items-center gap-x-1 shrink-0">
+        <img src="/game/chip.png" class="w-5" alt="chip">
+        <p class="text-white text-sm monospace">90</p>
+      </div>
+    {/if}
   </section>
 </div>
 
