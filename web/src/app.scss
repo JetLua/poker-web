@@ -19,4 +19,8 @@
   .monospace {
     @apply font-[monospace];
   }
+
+  .writing-v {
+    writing-mode: vertical-lr;
+  }
 }

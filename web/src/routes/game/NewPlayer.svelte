@@ -14,19 +14,14 @@
 
 <div class="relative flex flex-col justify-center gap-y-2 items-center p-2">
   <p class="text-white text-sm leading-none monospace">No.{data.index}</p>
-  <div class="w-10 aspect-square bg-indigo-200 rounded-md flex items-start justify-center gap-x">
-    {#each data.cards as c}
+  <div class="w-10 aspect-square bg-white rounded-md flex items-start justify-center gap-x bg-[url('/game/avatar/boy-11.png')] bg-center bg-cover bg-no-repeat">
+    <!-- {#each data.cards as c}
       <Card class="!w-4"/>
-    {/each}
+    {/each} -->
   </div>
   <p class="leading-none text-sm text-white monospace">9000</p>
   <section
-    class:top-full={orientation === 'top'}
-    class:left-full={orientation === 'left'}
-    class:right-full={orientation === 'right'}
-    class:bottom-full={orientation === 'bottom'}
-    class:flex-col={orientation === 'left' || orientation === 'right'}
-    class={clsx('absolute flex items-center justify-center gap-1', orientation === 'top' || orientation === 'bottom' ? 'w-full h-5' : 'h-full w-5')}>
+    class={clsx('absolute flex gap-1', orientation === 'top' || orientation === 'bottom' ? 'w-fit h-fit' : 'h-full w-fit', orientation === 'right' ? 'justify-center items-end right-full flex-col' : orientation === 'left' ? 'justify-center items-start left-full flex-col' : orientation === 'top' ? 'justify-center items-center top-full' : 'justify-center items-center bottom-full')}>
     {#if room.state.owner === data.id}
       <Key class="stroke-white stroke-2 w-6 h-6 block shrink-0"/>
       <XboxB class="stroke-white stroke-2 w-6 h-6 block shrink-0"/>
@@ -37,8 +32,9 @@
     {/if}
 
     <!-- 下注占位符 -->
-    <div class="text-sm aspect-square w-6 bg-center bg-cover bg-no-repeat">
-      <p class="flex items-center justify-center font-bold text-white backdrop-blur bg-purple-800/30 backdrop-opacity-50 w-full h-full rounded-full">90</p>
+    <div class="text-sm w-max flex justify-center items-center gap-x-1 shrink-0">
+      <img src="/game/chip.png" class="w-5" alt="chip">
+      <p class="text-white text-sm monospace">90</p>
     </div>
   </section>
 </div>
