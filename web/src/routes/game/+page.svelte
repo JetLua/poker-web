@@ -78,7 +78,7 @@
 
   <!-- 上插槽 -->
   {#if snap.tPlayers.length}
-    <div class="absolute flex gap-x-4 items-center mx-auto left-0 right-0 top-0 h-fit w-fit">
+    <div class="absolute flex gap-x-8 items-center mx-auto left-0 right-0 top-0 h-fit w-fit">
       {#each snap.tPlayers as p}
         <Player
           data={p.state}
