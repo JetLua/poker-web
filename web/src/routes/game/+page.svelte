@@ -1,9 +1,9 @@
 <script lang="ts">
   import {untrack} from 'svelte'
-  // import {room, user} from '~/core/store.svelte'
-  import Player from './NewPlayer.svelte'
   import * as simulator from '~/core/simulator.svelte'
-    import {store} from '~/core'
+  import {audio, delay, store} from '~/core'
+  import Player from './NewPlayer.svelte'
+  import Card from './Card.svelte'
 
   const room = simulator.room
 
@@ -48,6 +48,18 @@
       }
     })
   })
+
+  $effect(() => {
+    if (room.state.phase !== 'deal') return
+
+    !async function() {
+      for (const c of room.state.cards) {
+        c.placeholder = false
+        audio.play('slide')
+        await delay(.2)
+      }
+    }()
+  })
 </script>
 
 
@@ -56,7 +68,7 @@
     <div class="flex flex-col gap-2">
       <div class="flex w-fit h-fit gap-2">
         {#each room.state.cards as card, i (i)}
-          <div class="card"></div>
+          <Card placeholder={card.placeholder} pub/>
         {/each}
       </div>
       <div class="flex self-center justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: 0</div>

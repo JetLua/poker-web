@@ -27,7 +27,7 @@ declare global {
     /** 方位 */
     type Orientation = 'top' | 'left' | 'right' | 'bottom'
     /** 房间状态 */
-    type Phase = 'ready' | '' | 'deal'
+    type Phase = 'ready' | 'deal'
 
     interface Player {
       banker: boolean

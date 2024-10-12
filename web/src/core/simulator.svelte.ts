@@ -3,8 +3,15 @@ import * as store from './store.svelte'
 
 export class Room {
   state = $state({
+    id: '',
     players: {} as Record<string, Player>,
-    cards: [{}, {}, {}, {}, {}],
+    cards: [
+      {placeholder: true},
+      {placeholder: true},
+      {placeholder: true},
+      {placeholder: true},
+      {placeholder: true}
+    ],
     capcity: 4,
     password: '',
     visitable: true,
@@ -12,7 +19,11 @@ export class Room {
     banker: '',
     /** 房主id */
     owner: '',
-    phase: 'ready',
+    /**
+     * ready: 准备阶段，游戏未开始
+     * deal: 发牌阶段，客户端实现发牌动画
+     */
+    phase: 'ready' as yew.Phase,
     get playersCount() {
       return Object.keys(this.players).length
     }
@@ -33,10 +44,16 @@ export class Room {
 
   constructor() {
     const total = 10
+    const {state} = this
+
+    state.id = crypto.randomUUID()
 
     for (let i = 0; i < total; i++) {
       const p = new Player()
+      p.room = this
       p.state.index = i
+      p.state.rid = state.id
+      p.state.balance = 9000
       this.state.players[p.state.id] = p
     }
 
@@ -44,26 +61,56 @@ export class Room {
     store.user.id = this.getPlayer(total * Math.random() | 0).state.id
 
     // 随机设置房主
-    this.state.owner = this.getPlayer(total * Math.random() | 0).state.id
+    // 测试时 将当前用户设置为房主
+    this.state.owner = store.user.id // this.getPlayer(total * Math.random() | 0).state.id
+  }
+
+  nextPlayer() {
+
   }
 
   start() {
-    const {state: {playersCount, players}} = this
+    const {state} = this
     // 抽取随机庄家
-    this.state.banker = this.getPlayer(playersCount * Math.random() | 0).state.id
+    const banker = this.getPlayer(state.playersCount * Math.random() | 0)
+    state.banker = banker.state.id
+    state.phase = 'deal'
+    // 分配大小盲注
+    const sb = banker.next()
+    const bb = sb.next()
+    sb.bet(10)
+    bb.bet(2 * 10)
   }
 }
 
 export class Player {
+  room?: Room
+
   state = $state({
     id: '',
+    rid: '',
     index: 0,
     bet: 0,
+    balance: 0,
     cards: [{}, {}],
   })
 
   constructor() {
     this.state.id = crypto.randomUUID()
+  }
+
+  bet(v: number) {
+    if (v < this.state.balance) {
+      this.state.bet += v
+      this.state.balance -= v
+    } else {
+      // todo
+    }
+  }
+
+  next() {
+    if (!this.room) return
+    return this.room.getPlayer((this.state.index + 1) % this.room.state.playersCount)
   }
 }
 
