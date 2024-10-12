@@ -8,7 +8,7 @@ export function play(name: 'chip' | 'slide') {
     case 'chip': {
       let h = chips.pop()
       if (h) return h.play()
-      h = new Howl({src: '/game/audio/chip.ogg', autoplay: true})
+      h = new Howl({src: '/game/audio/chip.mp3', autoplay: true})
       h.on('end', () => chips.push(h))
       break
     }
@@ -16,7 +16,7 @@ export function play(name: 'chip' | 'slide') {
     case 'slide': {
       let h = slides.pop()
       if (h) return h.play()
-      h = new Howl({src: '/game/audio/card-slide.ogg', autoplay: true})
+      h = new Howl({src: '/game/audio/card-slide.mp3', autoplay: true})
       h.on('end', () => slides.push(h))
     }
   }
