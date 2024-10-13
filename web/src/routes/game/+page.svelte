@@ -4,6 +4,7 @@
   import {audio, delay, store} from '~/core'
   import Player from './NewPlayer.svelte'
   import Card from './Card.svelte'
+    import {slide} from 'svelte/transition'
 
   const room = simulator.room
 
@@ -16,7 +17,7 @@
     /** left slots */
     lPlayers: [] as simulator.Player[],
     /** right slots */
-    rPlayers: [] as simulator.Player[]
+    rPlayers: [] as simulator.Player[],
   })
 
   $effect(() => {
@@ -64,7 +65,12 @@
 
 
 <div class="root w-screen h-dvh bg-indigo-100 m-auto mx-[-1rem] relative">
-  <div class="desktop absolute m-auto top-0 left-0 right-0 bottom-0" bind:this={snap.desktopRef}>
+  <div class="w-fit h-fit absolute m-auto top-0 left-0 right-0 bottom-0" bind:this={snap.desktopRef}>
+    <section class="absolute bottom-full w-full text-center text-white/50 mb-4">
+      {#each room.state.logs as l (l)}
+        <p transition:slide={{axis: 'x'}}>{l}</p>
+      {/each}
+    </section>
     <div class="flex flex-col gap-2">
       <div class="flex w-fit h-fit gap-2">
         {#each room.state.cards as card, i (i)}
@@ -127,18 +133,5 @@
 <style lang="scss">
   .root {
     background: radial-gradient(circle, #80a8c6, #3b4389);
-  }
-
-  .desktop {
-    width: fit-content;
-    height: fit-content;
-    background-color: transparent;
-  }
-
-  .card {
-    aspect-ratio: 14/19;
-    border: 1px dashed #fff;
-    border-radius: .2rem;
-    width: 2.5rem;
   }
 </style>

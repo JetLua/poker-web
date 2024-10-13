@@ -68,7 +68,7 @@
 
 <div class="m-auto w-main">
   <div class="border-b border-solid border-indigo-300 py-2 flex justify-between">
-    <h3 class="text-[2rem] font-bold text-gradient bg-gradient-to-r from-cyan-500 to-lime-500">Holdem Poker</h3>
+    <h3 class="text-[2rem] font-bold text-gradient bg-gradient-to-r from-cyan-500 to-lime-500">Texas Holdem Poker</h3>
     {#if store.user.id}<Button variant="outlined" onclick={showModal}>Create Room</Button>{/if}
   </div>
   <div class="grid grid-cols-2 mt-4 gap-4 md:grid-cols-3 lg:grid-cols-6">

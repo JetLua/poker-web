@@ -12,11 +12,12 @@ export class Room {
       {placeholder: true},
       {placeholder: true}
     ],
+    logs: [] as string[],
     capcity: 4,
     password: '',
     visitable: true,
     /** 庄家id */
-    banker: '',
+    dealer: '',
     /** 房主id */
     owner: '',
     /**
@@ -42,6 +43,11 @@ export class Room {
     return this.state.players[v]
   }
 
+  log(s: string) {
+    this.state.logs.push(s)
+    if (this.state.logs.length > 5) this.state.logs.shift()
+  }
+
   constructor() {
     const total = 10
     const {state} = this
@@ -65,31 +71,36 @@ export class Room {
     this.state.owner = store.user.id // this.getPlayer(total * Math.random() | 0).state.id
   }
 
-  nextPlayer() {
-
-  }
-
-  start() {
+  async start() {
     const {state} = this
     // 抽取随机庄家
-    const banker = this.getPlayer(state.playersCount * Math.random() | 0)
-    state.banker = banker.state.id
+    const dealer = this.getPlayer(state.playersCount * Math.random() | 0)
+    state.dealer = dealer.state.id
     state.phase = 'deal'
+    this.log('游戏开始')
+    this.log(`庄家: ${dealer.name}`)
     // 分配大小盲注
-    const sb = banker.next()
+    const sb = dealer.next()
     const bb = sb.next()
     sb.bet(10)
     bb.bet(2 * 10)
+    this.log(`小盲: ${sb.name}`)
+    this.log(`大盲: ${bb.name}`)
+
+    //
   }
 }
 
 export class Player {
   room?: Room
 
+  get name() {return this.state.name || `No.${this.state.index}`}
+
   state = $state({
     id: '',
     rid: '',
     index: 0,
+    name: '',
     bet: 0,
     balance: 0,
     cards: [{}, {}],

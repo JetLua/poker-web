@@ -4,7 +4,7 @@
   import {audio} from '~/core'
   import Card from './Card.svelte'
   import {Button, Digit} from '$lib/sui'
-  import {Key, XboxB} from '$lib/sui/icon'
+  import {Key, CircleD} from '$lib/sui/icon'
   import * as store from '~/core/store.svelte'
   import {flushSync, type SvelteComponent} from 'svelte'
 
@@ -80,8 +80,8 @@
       <!-- <XboxB class="stroke-white stroke-2 w-6 h-6 block shrink-0"/> -->
     {/if}
 
-    {#if room.state.banker === data.id}
-      <XboxB class="stroke-white stroke-2 w-6 h-6 block"/>
+    {#if room.state.dealer === data.id}
+      <CircleD class="stroke-white stroke-2 w-6 h-6 block"/>
     {/if}
 
     <!-- 下注占位符 -->
