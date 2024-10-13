@@ -1,5 +1,6 @@
 import {browser} from '$app/environment'
 import * as store from './store.svelte'
+import {delay} from './core'
 
 export class Room {
   state = $state({
@@ -87,12 +88,20 @@ export class Room {
     this.log(`小盲: ${sb.name}`)
     this.log(`大盲: ${bb.name}`)
 
-    //
+    let r
+    // 等待发牌结束
+    await delay(2)
+
+    r = await bb.next().run('act')
+
+    console.log(r)
   }
 }
 
 export class Player {
   room?: Room
+  ac?: AbortController
+  ai?: boolean
 
   get name() {return this.state.name || `No.${this.state.index}`}
 
@@ -103,11 +112,33 @@ export class Player {
     name: '',
     bet: 0,
     balance: 0,
+    online: true,
+    countdown: 0,
     cards: [{}, {}],
   })
 
+
   constructor() {
     this.state.id = crypto.randomUUID()
+  }
+
+  async tick(t: number, signal: AbortSignal): Promise<boolean> {
+    this.state.countdown = t
+    if (!t) return true
+    await delay(1, signal)
+    if (signal.aborted) return false
+    return this.tick(t - 1, signal)
+  }
+
+  async run(type: 'act') {
+    switch (type) {
+      case 'act': {
+        // 等待玩家操作
+        this.ac = new AbortController()
+        delay(5).then(() => this.ac.abort())
+        return this.tick(10, this.ac.signal)
+      }
+    }
   }
 
   bet(v: number) {

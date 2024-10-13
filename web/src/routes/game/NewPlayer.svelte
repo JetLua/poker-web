@@ -60,7 +60,7 @@
     >Start</Button>
   {/if}
   <p class="text-white text-sm leading-none monospace">No.{data.index}</p>
-  <div bind:this={snap.avatarRef} class="w-10 aspect-square bg-white rounded-md flex items-center justify-center gap-x-1 bg-[url('/game/avatar/boy-11.png')] bg-center bg-cover bg-no-repeat">
+  <div bind:this={snap.avatarRef} class="relative w-10 aspect-square bg-white rounded-md flex items-center justify-center gap-x-1 bg-[url('/game/avatar/boy-11.png')] bg-center bg-cover bg-no-repeat">
     {#each snap.holeCards as c, i (`${c.x}${c.y}${i}`)}
       <Card
         class={clsx('!w-4', room.state.phase !== 'deal' ? 'hidden' : '')}
@@ -69,8 +69,9 @@
         --y={`${c.y}px`}
       />
     {/each}
-    <!-- <Card bind:this={snap.holeCards[0].ref} class="!w-4" --x={`${snap.holeCards[0].x}px`} --y={`${snap.holeCards}`}/> -->
-    <!-- <Card bind:this={snap.holeCards[1].ref} class="!w-4"/> -->
+    {#if data.countdown}
+      <div class="absolute top-0 left-0 text-white bg-black/80 font-bold flex items-center justify-center w-full h-full rounded-md">{data.countdown}</div>
+    {/if}
   </div>
   <Digit class="leading-none text-sm text-white monospace" value={data.balance}/>
   <section
