@@ -79,7 +79,7 @@
   <div class="w-fit h-fit absolute m-auto top-0 left-0 right-0 bottom-0" bind:this={snap.desktopRef}>
     <section class="absolute bottom-full w-full text-center text-white/50 mb-4 flex flex-col gap-y-2">
       {#each room.state.logs as l (l)}
-        <p transition:slide={{axis: 'x'}}>{l}</p>
+        <p>{l}</p>
       {/each}
     </section>
     <div class="flex flex-col gap-2">

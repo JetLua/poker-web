@@ -6,7 +6,6 @@
   import {Button, Digit} from '$lib/sui'
   import {Key, CircleD} from '$lib/sui/icon'
   import * as store from '~/core/store.svelte'
-  import {flushSync, type SvelteComponent} from 'svelte'
 
   interface Props {
     data: Player['state']
@@ -88,7 +87,7 @@
     <!-- 下注占位符 -->
     {#if data.bet}
       <div class="text-sm w-max flex justify-center items-center gap-x-1 shrink-0">
-        <img src="/game/chip.png" class="w-5" alt="chip">
+        <div class="aspect-square w-6 bg-[url('/game/chip.png')] bg-center bg-cover bg-no-repeat bg-[length:80%]"></div>
         <Digit class="text-white text-sm monospace" value={data.bet}/>
       </div>
     {/if}
