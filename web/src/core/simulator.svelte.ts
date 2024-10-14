@@ -109,15 +109,15 @@ export class Room {
     const dealer = this.getPlayer(state.playersCount * Math.random() | 0)
     state.dealer = dealer.state.id
     state.phase = 'deal'
-    this.log('游戏开始')
-    this.log(`庄家: ${dealer.name}`)
+    this.log('Game started')
+    this.log(`Dealer: ${dealer.name}`)
     // 分配大小盲注
     const sb = dealer.next()
     const bb = sb.next()
     sb.bet(10)
     bb.bet(2 * 10)
-    this.log(`小盲: ${sb.name}`)
-    this.log(`大盲: ${bb.name}`)
+    this.log(`Small blind: ${sb.name}`)
+    this.log(`Big blind: ${bb.name}`)
 
     let r, p
     // 等待发牌结束
@@ -126,7 +126,7 @@ export class Room {
     p = bb
     while (true) {
       p = p.next()
-      this.log(`${p.name}: 正在决策`)
+      this.log(`${p.name}: Making a decision`)
       r = await p.run('act')
       this.log(`${p.name}: ${r.action} ${r.v}`)
     }
