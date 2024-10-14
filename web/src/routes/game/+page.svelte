@@ -1,10 +1,11 @@
 <script lang="ts">
   import {untrack} from 'svelte'
+  import {slide} from 'svelte/transition'
   import * as simulator from '~/core/simulator.svelte'
   import {audio, delay, store} from '~/core'
   import Player from './NewPlayer.svelte'
   import Card from './Card.svelte'
-    import {slide} from 'svelte/transition'
+    import Digit from '~/lib/sui/Digit.svelte'
 
   const room = simulator.room
 
@@ -61,12 +62,22 @@
       }
     }()
   })
+
+  const pot = $derived.by(() => {
+    let v = 0
+    for (const t of room.state.turns) {
+      for (const k in t) {
+        v += t[k]
+      }
+    }
+    return v
+  })
 </script>
 
 
 <div class="root w-screen h-dvh bg-indigo-100 m-auto mx-[-1rem] relative">
   <div class="w-fit h-fit absolute m-auto top-0 left-0 right-0 bottom-0" bind:this={snap.desktopRef}>
-    <section class="absolute bottom-full w-full text-center text-white/50 mb-4">
+    <section class="absolute bottom-full w-full text-center text-white/50 mb-4 flex flex-col gap-y-2">
       {#each room.state.logs as l (l)}
         <p transition:slide={{axis: 'x'}}>{l}</p>
       {/each}
@@ -77,7 +88,7 @@
           <Card placeholder={card.placeholder} pub/>
         {/each}
       </div>
-      <div class="flex self-center justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: 0</div>
+      <div class="flex self-center justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: <Digit value={pot}/></div>
     </div>
   </div>
 

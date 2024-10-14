@@ -2,7 +2,36 @@ import {browser} from '$app/environment'
 import * as store from './store.svelte'
 import {delay} from './core'
 
+class AI {
+  player: Player
+
+  constructor(player: Player) {
+    this.player = player
+  }
+
+  /**
+   * 只有3种情况：
+   * 1. 过牌 如果可以过
+   * 2. 跟注
+   * 3. 弃牌
+   * 4. all in
+   */
+  async run(signal: AbortSignal): Promise<yew.Action> {
+    // 等待5秒 模拟思考
+    await delay(5)
+    // 停止前端倒计时
+    this.player.state.countdown = 0
+    const bet = this.player.prev().state.bet
+    if (bet < this.player.state.balance) {
+      this.player.bet(bet)
+      return {action: 'call', v: bet}
+    }
+  }
+}
+
+
 export class Room {
+
   state = $state({
     id: '',
     players: {} as Record<string, Player>,
@@ -14,6 +43,8 @@ export class Room {
       {placeholder: true}
     ],
     logs: [] as string[],
+    turnsIndex: 0,
+    turns: [{}] as Record<string, number>[],
     capcity: 4,
     password: '',
     visitable: true,
@@ -56,7 +87,7 @@ export class Room {
     state.id = crypto.randomUUID()
 
     for (let i = 0; i < total; i++) {
-      const p = new Player()
+      const p = new Player({ai: true})
       p.room = this
       p.state.index = i
       p.state.rid = state.id
@@ -88,20 +119,26 @@ export class Room {
     this.log(`小盲: ${sb.name}`)
     this.log(`大盲: ${bb.name}`)
 
-    let r
+    let r, p
     // 等待发牌结束
     await delay(2)
 
-    r = await bb.next().run('act')
-
-    console.log(r)
+    p = bb
+    while (true) {
+      p = p.next()
+      this.log(`${p.name}: 正在决策`)
+      r = await p.run('act')
+      this.log(`${p.name}: ${r.action} ${r.v}`)
+    }
   }
 }
 
 export class Player {
   room?: Room
-  ac?: AbortController
-  ai?: boolean
+  signal?: AbortSignal
+  ai?: AI
+  ws?: WebSocket
+  handle?: (opts: yew.Action) => void
 
   get name() {return this.state.name || `No.${this.state.index}`}
 
@@ -118,15 +155,28 @@ export class Player {
   })
 
 
-  constructor() {
+  constructor(opts: {ai?: boolean} = {}) {
     this.state.id = crypto.randomUUID()
+    if (opts.ai) this.ai = new AI(this)
+  }
+
+  async respond(signal: AbortSignal) {
+    return new Promise<yew.Action>(resolve => {
+      this.handle = resolve
+      signal.addEventListener('abort', () => {
+        this.handle({action: 'fold'})
+      }, {once: true})
+    })
   }
 
   async tick(t: number, signal: AbortSignal): Promise<boolean> {
     this.state.countdown = t
     if (!t) return true
-    await delay(1, signal)
-    if (signal.aborted) return false
+    await delay(1)
+    if (signal.aborted || !this.state.countdown) {
+      this.state.countdown = 0
+      return false
+    }
     return this.tick(t - 1, signal)
   }
 
@@ -134,9 +184,9 @@ export class Player {
     switch (type) {
       case 'act': {
         // 等待玩家操作
-        this.ac = new AbortController()
-        delay(5).then(() => this.ac.abort())
-        return this.tick(10, this.ac.signal)
+        this.signal = AbortSignal.timeout(10e3)
+        this.tick(10, this.signal)
+        return this.ai ? this.ai.run(this.signal) : this.respond(this.signal)
       }
     }
   }
@@ -145,6 +195,7 @@ export class Player {
     if (v < this.state.balance) {
       this.state.bet += v
       this.state.balance -= v
+      this.room.state.turns[this.room.state.turnsIndex][this.state.id] = this.state.bet
     } else {
       // todo
     }
@@ -153,6 +204,13 @@ export class Player {
   next() {
     if (!this.room) return
     return this.room.getPlayer((this.state.index + 1) % this.room.state.playersCount)
+  }
+
+  prev() {
+    if (!this.room) return
+    let i = this.state.index - 1
+    if (i < 0) i += this.room.state.playersCount
+    return this.room.getPlayer(i % this.room.state.playersCount)
   }
 }
 

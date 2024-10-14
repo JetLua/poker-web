@@ -29,6 +29,21 @@ declare global {
     /** 房间状态 */
     type Phase = 'ready' | 'deal'
 
+    /**
+     * 玩家可以采取的行动
+     * call: 跟注
+     * raise: 加注
+     * fold: 弃牌
+     * all in: 下注所有筹码
+     * check: 过牌
+     */
+    type ActionType = 'call' | 'raise' | 'fold' | 'all in' | 'check'
+
+    interface Action {
+      action: ActionType
+      v?: number
+    }
+
     interface Player {
       banker: boolean
     }
