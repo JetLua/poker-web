@@ -74,7 +74,6 @@
   })
 </script>
 
-
 <div class="root w-screen h-dvh bg-indigo-100 m-auto mx-[-1rem] relative">
   <div class="w-fit h-fit absolute m-auto top-0 left-0 right-0 bottom-0" bind:this={snap.desktopRef}>
     <section class="absolute bottom-full w-full text-center text-white/50 mb-4 flex flex-col gap-y-2">

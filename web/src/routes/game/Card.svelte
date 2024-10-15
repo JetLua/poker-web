@@ -1,5 +1,6 @@
 <script lang="ts">
   import clsx from 'clsx'
+  import type {Snippet} from 'svelte'
 
   interface Props {
     class?: string
@@ -21,9 +22,7 @@
 <div
   bind:this={root}
   class={clsx(_class, placeholder ? '' : 'bg-[url("/game/card-back.png")] bg-cover bg-center bg-no-repeat !border-none', pub ? 'pub' : 'card')}
->
-
-</div>
+></div>
 
 <style lang="scss">
   .card {
