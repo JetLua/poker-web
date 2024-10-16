@@ -30,7 +30,7 @@
     else if (v === 11) return 'J'
     else if (v === 12) return 'Q'
     else if (v === 13) return 'K'
-    return v.toString()
+    return v?.toString()
   }
 
   function init(el: HTMLDivElement) {
@@ -74,15 +74,15 @@
   }
 
   .effect {
-    @apply h-10;
+    @apply w-4;
     background: url("/game/card-back.png") center / cover no-repeat;
     transform-origin: center;
-    transition: transform 1s ease, opacity 2s ease;
+    transition: transform 1.5s ease, opacity 3s ease-out;
     transform: translate(0, 0);
     opacity: 0;
 
     @starting-style {
-      transform: translate(var(--x), var(--y));
+      transform: translate(var(--x), var(--y)) scale(2);
       opacity: 1;
     }
   }

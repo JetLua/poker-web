@@ -14,10 +14,11 @@
 
   const {data, orientation}: Props = $props()
   const snap = $state({
-    holeCards: [
-      {ref: undefined as ReturnType<typeof Card>, x: 0, y: 0},
-      {ref: undefined as ReturnType<typeof Card>, x: 0, y: 0},
-    ],
+    // holeCards: [
+    //   {ref: undefined as ReturnType<typeof Card>, x: 0, y: 0},
+    //   {ref: undefined as ReturnType<typeof Card>, x: 0, y: 0},
+    // ],
+    holeCard: {x: 0, y: 0},
     avatarRef: undefined as undefined | HTMLElement,
     /** 发牌动画结束 */
     dealt: false
@@ -40,10 +41,8 @@
     // 获取中心点
     const c = [(r.left + r.right) / 2, (r.top + r.bottom) / 2]
 
-    for (const card of snap.holeCards) {
-      card.x = w / 2 - c[0]
-      card.y = h / 2 - c[1]
-    }
+    snap.holeCard.x = w / 2 - c[0]
+    snap.holeCard.y = h / 2 - c[1]
   })
 
   // 开牌
@@ -64,26 +63,26 @@
   {/if}
   <p class="text-white text-sm leading-none monospace">No.{data.index}</p>
   <section class="flex items-center gap-x-2">
-    <div bind:this={snap.avatarRef} class="relative w-10 aspect-square bg-white rounded-md flex items-center justify-center gap-x-1 bg-[url('/game/avatar/boy-11.png')] bg-center bg-cover bg-no-repeat">
-      {#each snap.holeCards as c, i (`${c.x}${c.y}${i}`)}
-        <Card
-          type="effect"
-          class={clsx('!h-10', room.state.phase !== 'deal' ? 'hidden' : '')}
-          bind:this={c.ref}
-          suit={data.cards[i].suit}
-          num={data.cards[i].num}
-          --x={`${c.x}px`}
-          --y={`${c.y}px`}
-          onDeal={() => snap.dealt = true}
-        />
-      {/each}
+    <div bind:this={snap.avatarRef} class="relative w-10 aspect-square bg-white rounded-md flex items-center justify-center gap-x-1 bg-[url('/game/avatar/boy-11.png')] bg-center bg-cover bg-no-repeat"
+      style:--x={`${snap.holeCard.x}px`} style:--y={`${snap.holeCard.y}px`}>
+      {#if room.state.phase === 'deal'}
+        {@const c = snap.holeCard}
+        {#key `${c.x}${c.y}`}
+          <Card
+            type="effect"
+            --x={`${snap.holeCard.x}px`}
+            --y={`${snap.holeCard.y}px`}
+            onDeal={() => snap.dealt = true}
+          />
+        {/key}
+      {/if}
       {#if data.countdown}
         <div class="absolute top-0 left-0 text-white bg-black/80 font-bold flex items-center justify-center w-full h-full rounded-md">{data.countdown}</div>
       {/if}
     </div>
     {#if showdown}
       <div class="flex items-center gap-x-2">
-        {#each snap.holeCards as c, i (`${c.x}${c.y}${i}`)}
+        {#each data.cards as c, i (`${c.num}${c.suit}`)}
           <Card
             showdown
             type="hand"
