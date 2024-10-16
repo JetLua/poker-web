@@ -4,23 +4,24 @@
 
   interface Props {
     class?: string
+    type: 'public' | 'hand' | 'effect'
     num?: number
     suit?: yew.Suit
     placeholder?: boolean
-    pub?: boolean
-    self?: boolean
+    showdown?: boolean
+    /** 发牌动画结束事件 */
+    onDeal?: () => void
   }
 
-  const {placeholder, pub, num, suit, self, ...props}: Props = $props()
+  const {placeholder, num, suit, onDeal, ...props}: Props = $props()
 
   let root: HTMLElement
 
-  const opened = $derived.by(() => {
-    return !!num && self
-  })
-
   const _class = $derived.by(() => {
-    return ''
+    const cls = [props.class, 'card']
+    cls.push(props.type)
+    if (props.showdown) cls.push('showdown')
+    return clsx(cls)
   })
 
   function trNum(v: number) {
@@ -32,14 +33,15 @@
   }
 
   function init(el: HTMLDivElement) {
+    const ac = new AbortController()
+
     el.addEventListener('transitionend', e => {
-      el.classList.remove('!w-4')
-      el.classList.add('h-full')
-    })
+      onDeal?.()
+    }, {signal: ac.signal})
 
     return {
       destroy() {
-
+        ac.abort()
       }
     }
   }
@@ -50,8 +52,8 @@
 <div
   use:init
   bind:this={root}
-  class={clsx(_class, placeholder ? '' : 'bg-cover bg-center bg-no-repeat !border-none', pub ? 'pub' : 'card', self && 'self', opened ? 'bg-white' : 'bg-[url("/game/card-back.png")]', 'relative')}>
-  {#if num}
+  class={_class}>
+  {#if props.showdown}
     <span class="font-bold">{trNum(num)}</span>
     {#if suit === 'heart'}
       <Heart class="stroke-red-500 fill-red-500 w-4 h-4 absolute right-1 bottom-1"/>
@@ -68,16 +70,15 @@
 <style lang="scss">
   .card {
     aspect-ratio: 14/19;
-    border: 1px dashed #fff;
-    border-radius: .2rem;
-    width: 2.5rem;
+  }
+
+  .effect {
+    @apply h-10;
+    background: url("/game/card-back.png") center / cover no-repeat;
     transform-origin: center;
     transition: transform 1s ease, opacity 2s ease;
     transform: translate(0, 0);
-
-    &:not(.self) {
-      opacity: 0;
-    }
+    opacity: 0;
 
     @starting-style {
       transform: translate(var(--x), var(--y));
@@ -85,10 +86,16 @@
     }
   }
 
-  .pub {
+  .public {
     aspect-ratio: 14/19;
     border: 1px dashed #fff;
     border-radius: .2rem;
     width: 2.5rem;
+  }
+
+  .hand {
+    @apply h-10 relative;
+    background-color: #fff;
+    border-radius: .2rem;
   }
 </style>

@@ -84,7 +84,7 @@
     <div class="flex flex-col gap-2">
       <div class="flex w-fit h-fit gap-2">
         {#each room.state.cards as card, i (i)}
-          <Card placeholder={card.placeholder} pub/>
+          <Card placeholder={card.placeholder} type="public"/>
         {/each}
       </div>
       <div class="flex self-center justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: <Digit value={pot}/></div>

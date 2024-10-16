@@ -19,7 +19,8 @@
       {ref: undefined as ReturnType<typeof Card>, x: 0, y: 0},
     ],
     avatarRef: undefined as undefined | HTMLElement,
-
+    /** 发牌动画结束 */
+    dealt: false
   })
 
   $effect(() => {
@@ -44,6 +45,9 @@
       card.y = h / 2 - c[1]
     }
   })
+
+  // 开牌
+  const showdown = $derived(store.user.id === data.id && snap.dealt)
 </script>
 
 
@@ -59,22 +63,39 @@
     >Start</Button>
   {/if}
   <p class="text-white text-sm leading-none monospace">No.{data.index}</p>
-  <div bind:this={snap.avatarRef} class="relative w-10 aspect-square bg-white rounded-md flex items-center justify-center gap-x-1 bg-[url('/game/avatar/boy-11.png')] bg-center bg-cover bg-no-repeat">
-    {#each snap.holeCards as c, i (`${c.x}${c.y}${i}`)}
-      <Card
-        class={clsx('!w-4', room.state.phase !== 'deal' ? 'hidden' : '')}
-        bind:this={c.ref}
-        self={data.id === store.user.id}
-        suit={data.cards[i].suit}
-        num={data.cards[i].num}
-        --x={`${c.x}px`}
-        --y={`${c.y}px`}
-      />
-    {/each}
-    {#if data.countdown}
-      <div class="absolute top-0 left-0 text-white bg-black/80 font-bold flex items-center justify-center w-full h-full rounded-md">{data.countdown}</div>
+  <section class="flex items-center gap-x-2">
+    <div bind:this={snap.avatarRef} class="relative w-10 aspect-square bg-white rounded-md flex items-center justify-center gap-x-1 bg-[url('/game/avatar/boy-11.png')] bg-center bg-cover bg-no-repeat">
+      {#each snap.holeCards as c, i (`${c.x}${c.y}${i}`)}
+        <Card
+          type="effect"
+          class={clsx('!h-10', room.state.phase !== 'deal' ? 'hidden' : '')}
+          bind:this={c.ref}
+          suit={data.cards[i].suit}
+          num={data.cards[i].num}
+          --x={`${c.x}px`}
+          --y={`${c.y}px`}
+          onDeal={() => snap.dealt = true}
+        />
+      {/each}
+      {#if data.countdown}
+        <div class="absolute top-0 left-0 text-white bg-black/80 font-bold flex items-center justify-center w-full h-full rounded-md">{data.countdown}</div>
+      {/if}
+    </div>
+    {#if showdown}
+      <div class="flex items-center gap-x-2">
+        {#each snap.holeCards as c, i (`${c.x}${c.y}${i}`)}
+          <Card
+            showdown
+            type="hand"
+            class={clsx('!h-10')}
+            suit={data.cards[i].suit}
+            num={data.cards[i].num}
+          />
+        {/each}
+      </div>
     {/if}
-  </div>
+  </section>
+
   <Digit class="leading-none text-sm text-white monospace" value={data.balance}/>
   <section
     class={clsx('absolute flex gap-1', orientation === 'top' || orientation === 'bottom' ? 'w-fit h-fit' : 'h-full w-fit', orientation === 'right' ? 'justify-center items-end right-full flex-col' : orientation === 'left' ? 'justify-center items-start left-full flex-col' : orientation === 'top' ? 'justify-center items-center top-full' : 'justify-center items-center bottom-full')}>
