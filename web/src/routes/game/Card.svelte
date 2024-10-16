@@ -20,6 +20,7 @@
   const _class = $derived.by(() => {
     const cls = [props.class, 'card']
     cls.push(props.type)
+    if (placeholder) cls.push('placeholder')
     if (props.showdown) cls.push('showdown')
     return clsx(cls)
   })
@@ -54,15 +55,15 @@
   bind:this={root}
   class={_class}>
   {#if props.showdown}
-    <span class="font-bold">{trNum(num)}</span>
+    <span class={clsx('font-bold', suit === 'heart' || suit === 'diamond' ? 'text-red-500' : 'text-stone-800', 'left-px absolute leading-none top-px')}>{trNum(num)}</span>
     {#if suit === 'heart'}
-      <Heart class="stroke-red-500 fill-red-500 w-4 h-4 absolute right-1 bottom-1"/>
+      <Heart class="stroke-red-500 fill-red-500 w-4 h-4 absolute right-px bottom-px"/>
     {:else if suit === 'club'}
-      <Club class="stroke-stone-800 fill-stone-800 w-4 h-4 absolute right-1 bottom-1"/>
+      <Club class="stroke-stone-800 fill-stone-800 w-4 h-4 absolute right-px bottom-px"/>
     {:else if suit === 'diamond'}
-      <Diamond class="stroke-red-500 fill-red-500 w-4 h-4 absolute right-1 bottom-1"/>
+      <Diamond class="stroke-red-500 fill-red-500 w-4 h-4 absolute right-px bottom-px"/>
     {:else if suit === 'spade'}
-      <Spade class="stroke-stone-800 fill-stone-800 w-4 h-4 absolute right-1 bottom-1"/>
+      <Spade class="stroke-stone-800 fill-stone-800 w-4 h-4 absolute right-px bottom-px"/>
     {/if}
   {/if}
 </div>
@@ -91,11 +92,25 @@
     border: 1px dashed #fff;
     border-radius: .2rem;
     width: 2.5rem;
+
+    &:not(.placeholder) {
+      border: none;
+      border-radius: 0;
+      background: url("/game/card-back.png") center / cover no-repeat;
+    }
   }
 
   .hand {
     @apply h-10 relative;
     background-color: #fff;
     border-radius: .2rem;
+    opacity: 1;
+    transform: translate(0, 0);
+    transition: transform 1s ease, opacity 2s ease;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateX(-50%);
+    }
   }
 </style>
