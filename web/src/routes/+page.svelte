@@ -2,7 +2,7 @@
   import {onMount} from 'svelte'
   import {goto} from '$app/navigation'
   import {Button, AsButton, Input, Switch, toast} from '$lib/sui'
-  import {EyeOff, Lock} from '$lib/sui/icon'
+  import {EyeOff, Lock, Heart, Spade, Diamond, Club} from '$lib/sui/icon'
   import {store, sync} from '~/core'
   import * as api from '~/api'
 
@@ -75,6 +75,13 @@
     {#each snap.rooms as item (item.id)}
       {@render room(item)}
     {/each}
+  </div>
+
+  <div>
+    <Heart class="fill-red-500 stroke-red-500"/>
+    <Club/>
+    <Diamond/>
+    <Spade/>
   </div>
 </div>
 

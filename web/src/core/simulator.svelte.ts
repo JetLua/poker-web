@@ -31,6 +31,7 @@ class AI {
 
 
 export class Room {
+  cards = [] as yew.Card[]
 
   state = $state({
     id: '',
@@ -103,6 +104,33 @@ export class Room {
     this.state.owner = store.user.id // this.getPlayer(total * Math.random() | 0).state.id
   }
 
+  /** 发牌 */
+  deal() {
+    const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    const suits = ['heart', 'diamond', 'club', 'spade'] as yew.Suit[]
+    const cards = [] as yew.Card[]
+    for (const n of nums) {
+      for (const s of suits) {
+        cards.push({num: n, suit: s})
+      }
+    }
+
+    // 五张底牌
+    for (let i = 0; i < 5; i++) {
+      const i = cards.length * Math.random() | 0
+      this.cards.push(...cards.splice(i, 1))
+    }
+
+    // 每个玩家两张
+    for (const k in this.state.players) {
+      const p = this.state.players[k]
+      for (let i = 0; i < 2; i++) {
+        const j = cards.length * Math.random() | 0
+        p.state.cards[i] = cards.splice(j, 1)[0]
+      }
+    }
+  }
+
   async start() {
     const {state} = this
     // 抽取随机庄家
@@ -121,6 +149,7 @@ export class Room {
 
     let r, p
     // 等待发牌结束
+    this.deal()
     await delay(2)
 
     p = bb
@@ -129,6 +158,7 @@ export class Room {
       this.log(`${p.name}: Making a decision`)
       r = await p.run('act')
       this.log(`${p.name}: ${r.action} ${r.v}`)
+      break
     }
   }
 }
@@ -142,6 +172,8 @@ export class Player {
 
   get name() {return this.state.name || `No.${this.state.index}`}
 
+  cards = [] as yew.Card[]
+
   state = $state({
     id: '',
     rid: '',
@@ -151,7 +183,7 @@ export class Player {
     balance: 0,
     online: true,
     countdown: 0,
-    cards: [{}, {}],
+    cards: [{}, {}] as yew.Card[],
   })
 
 

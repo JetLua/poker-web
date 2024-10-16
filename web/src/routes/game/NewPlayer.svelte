@@ -64,6 +64,9 @@
       <Card
         class={clsx('!w-4', room.state.phase !== 'deal' ? 'hidden' : '')}
         bind:this={c.ref}
+        self={data.id === store.user.id}
+        suit={data.cards[i].suit}
+        num={data.cards[i].num}
         --x={`${c.x}px`}
         --y={`${c.y}px`}
       />
