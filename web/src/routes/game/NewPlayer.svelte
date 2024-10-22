@@ -83,12 +83,13 @@
             <div class="absolute w-fit h-fit bg-white rounded-md bottom-[calc(100%+8px)] right-0 shadow-lg px-4 py-2">
               <div class="progress-bar">
                 <div
-                  class="w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md">
-                  <div>{9000}</div>
+                  class="w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md flex justify-center">
+                  <div class="bubble"><Digit value={90050}/></div>
                 </div>
               </div>
-              <div class="flex items-center justify-end gap-2 mt-2">
+              <div class="flex items-center justify-end gap-2 mt-2 whitespace-nowrap">
                 <button class="text-white bg-sky-500 rounded-md p-2 py-1">1/2 Pot</button>
+                <button class="text-white bg-sky-500 rounded-md p-2 py-1">All in</button>
                 <button class="text-white bg-lime-500 rounded-md p-2 py-1">Done</button>
               </div>
             </div>
@@ -131,7 +132,7 @@
     {/if}
   </section>
 
-  <Digit class="leading-none text-sm text-white monospace" value={data.balance}/>
+  <Digit class="leading-none text-sm text-white monospace" value={data.balance} abbr/>
   <section
     class={clsx('absolute flex gap-1', orientation === 'top' || orientation === 'bottom' ? 'w-fit h-fit' : 'h-full w-fit', orientation === 'right' ? 'justify-center items-end right-full flex-col' : orientation === 'left' ? 'justify-center items-start left-full flex-col' : orientation === 'top' ? 'justify-center items-center top-full' : 'justify-center items-center bottom-full')}>
     {#if room.state.owner === data.id}
@@ -168,9 +169,23 @@
       @apply h-6 flex items-center relative;
 
       &::before {
-        @apply block h-2 rounded-full bg-indigo-200 w-40 content-[""];
+        @apply block h-2 rounded-full bg-indigo-200 w-full content-[""];
       }
 
+      .bubble {
+        $color: #e66190;
+
+        @apply w-fit h-fit p-2 absolute bottom-[calc(100%+.8rem)] text-stone-500 rounded-md m-auto bg-white;
+        background-color: #fff;
+        box-shadow: 0 0 6px 0 $color;
+
+        &::after {
+          @apply w-0 h-0 content-[""] block absolute m-auto left-0 right-0 bottom-0 top-[calc(100%+.5rem)];
+          border: .5rem solid transparent;
+          border-top-color: #fff;
+          filter: drop-shadow(0 1px 0 $color);
+        }
+      }
     }
   }
 </style>

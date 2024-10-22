@@ -38,7 +38,6 @@
 		"dayjs": "^1.11.13",
 		"framer-motion": "^11.11.9",
 		"howler": "^2.2.4",
-		"popmotion": "^11.0.5",
 		"svelte-preprocess": "^6.0.3"
 	}
 }
