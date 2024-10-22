@@ -58,6 +58,7 @@ export class Room {
      * deal: 发牌阶段，客户端实现发牌动画
      */
     phase: 'ready' as yew.Phase,
+    currentBet: 0,
     get playersCount() {
       return Object.keys(this.players).length
     }
@@ -150,7 +151,7 @@ export class Room {
     let r, p
     // 等待发牌结束
     this.deal()
-    await delay(2)
+    await delay(3)
 
     p = bb
     while (true) {
@@ -184,6 +185,7 @@ export class Player {
     online: true,
     countdown: 0,
     cards: [{}, {}] as yew.Card[],
+    status: '' as 'act'
   })
 
 
@@ -216,6 +218,7 @@ export class Player {
     switch (type) {
       case 'act': {
         // 等待玩家操作
+        this.state.status = 'act'
         this.signal = AbortSignal.timeout(10e3)
         this.tick(10, this.signal)
         return this.ai ? this.ai.run(this.signal) : this.respond(this.signal)
@@ -225,6 +228,7 @@ export class Player {
 
   bet(v: number) {
     if (v < this.state.balance) {
+      this.room.state.currentBet = v
       this.state.bet += v
       this.state.balance -= v
       this.room.state.turns[this.room.state.turnsIndex][this.state.id] = this.state.bet

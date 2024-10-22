@@ -1,5 +1,9 @@
 <script lang="ts">
   import clsx from 'clsx'
+  import {fade, fly} from 'svelte/transition'
+  import {cubicOut} from 'svelte/easing'
+  import type {Action} from 'svelte/action'
+
   import {Player, room} from '~/core/simulator.svelte'
   import {audio} from '~/core'
   import Card from './Card.svelte'
@@ -47,6 +51,10 @@
 
   // 开牌
   const showdown = $derived(store.user.id === data.id && snap.dealt)
+
+  const acts = $derived.by(() => {
+    return ['fold', 'check', 'call', 'raise']
+  }) as yew.ActionType[]
 </script>
 
 
@@ -57,9 +65,37 @@
     <Button
       variant="outlined"
       textColor="#fff"
-      class="!absolute bottom-[calc(100%_+_2rem)] mb-2"
+      class="!absolute bottom-[calc(100%+2rem)] mb-2"
       onclick={room.start.bind(room)}
     >Start</Button>
+  {/if}
+  {#if store.user.id === data.id && data.id === room.state.owner && room.state.phase === 'deal'}
+    <div class="absolute bottom-[calc(100%_+_2rem)] mb-2 z-[3] w-fit h-fit flex gap-2">
+      {#each acts as act, i (act)}
+        <div
+          class="relative action text-center capitalize w-[4rem] h-fit bg-pink-500/80 text-white rounded-md p-2 text-normal"
+          class:!bg-lime-500={act === 'fold'}
+          class:!bg-cyan-500={act === 'check'}
+          class:!bg-pink-500={act === 'call'}
+          class:!bg-yellow-500={act === 'raise'}
+          style:transition-delay={`${i * .1}s`}>{act}
+          {#if act === 'raise'}
+            <div class="absolute w-fit h-fit bg-white rounded-md bottom-[calc(100%+8px)] right-0 shadow-lg px-4 py-2">
+              <div class="progress-bar">
+                <div
+                  class="w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md">
+                  <div>{9000}</div>
+                </div>
+              </div>
+              <div class="flex items-center justify-end gap-2 mt-2">
+                <button class="text-white bg-sky-500 rounded-md p-2 py-1">1/2 Pot</button>
+                <button class="text-white bg-lime-500 rounded-md p-2 py-1">Done</button>
+              </div>
+            </div>
+          {/if}
+        </div>
+      {/each}
+    </div>
   {/if}
   <p class="text-white text-sm leading-none monospace">No.{data.index}</p>
   <section class="flex items-center gap-x-2">
@@ -118,5 +154,23 @@
 </div>
 
 <style lang="scss">
+  .action {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all .5s ease;
 
+    @starting-style {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .progress-bar {
+      @apply h-6 flex items-center relative;
+
+      &::before {
+        @apply block h-2 rounded-full bg-indigo-200 w-40 content-[""];
+      }
+
+    }
+  }
 </style>
