@@ -25,7 +25,8 @@
     holeCard: {x: 0, y: 0},
     avatarRef: undefined as undefined | HTMLElement,
     /** 发牌动画结束 */
-    dealt: false
+    dealt: false,
+    raise: {progress: 0, x: 0}
   })
 
   $effect(() => {
@@ -49,6 +50,15 @@
     snap.holeCard.y = h / 2 - c[1]
   })
 
+  const bet = $derived.by(() => {
+    let currentBet = room.state.currentBet + (data.balance - room.state.currentBet) * snap.raise.progress
+    currentBet |= 0 // 取整
+    const r = currentBet % 10
+    if (r < 5) currentBet -= r
+    else currentBet += (10 - r)
+    return currentBet
+  })
+
   // 开牌
   const showdown = $derived(store.user.id === data.id && snap.dealt)
 
@@ -59,7 +69,7 @@
 
 
 
-<div class="relative flex flex-col justify-center gap-y-2 items-center p-2">
+<div class="relative flex flex-col justify-center gap-y-2 items-center p-2 root">
   <!-- 开始按钮 -->
   {#if store.user.id === data.id && data.id === room.state.owner && room.state.phase === 'ready'}
     <Button
@@ -78,13 +88,21 @@
           class:!bg-cyan-500={act === 'check'}
           class:!bg-pink-500={act === 'call'}
           class:!bg-yellow-500={act === 'raise'}
-          style:transition-delay={`${i * .1}s`}>{act}
+          style:transition-delay={`${i * .1}s`}>
+          <span>{act}</span>
           {#if act === 'raise'}
             <div class="absolute w-fit h-fit bg-white rounded-md bottom-[calc(100%+8px)] right-0 shadow-lg px-4 py-2">
-              <div class="progress-bar">
+              <div class="progress-bar"
+                style:--x={`${snap.raise.x}px`}
+                onpointerdown={e => {
+                  const p = e.offsetX / e.currentTarget.offsetWidth
+                  snap.raise.x = e.offsetX
+                  snap.raise.progress = p
+                }}>
+                <i></i>
                 <div
-                  class="w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md flex justify-center">
-                  <div class="bubble"><Digit value={90050}/></div>
+                  class="dot w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md flex justify-center">
+                  <div class="bubble"><Digit value={bet}/></div>
                 </div>
               </div>
               <div class="flex items-center justify-end gap-2 mt-2 whitespace-nowrap">
@@ -137,7 +155,6 @@
     class={clsx('absolute flex gap-1', orientation === 'top' || orientation === 'bottom' ? 'w-fit h-fit' : 'h-full w-fit', orientation === 'right' ? 'justify-center items-end right-full flex-col' : orientation === 'left' ? 'justify-center items-start left-full flex-col' : orientation === 'top' ? 'justify-center items-center top-full' : 'justify-center items-center bottom-full')}>
     {#if room.state.owner === data.id}
       <Key class="stroke-white stroke-2 w-6 h-6 block shrink-0"/>
-      <!-- <XboxB class="stroke-white stroke-2 w-6 h-6 block shrink-0"/> -->
     {/if}
 
     {#if room.state.dealer === data.id}
@@ -168,14 +185,24 @@
     .progress-bar {
       @apply h-6 flex items-center relative;
 
-      &::before {
+      & > i {
         @apply block h-2 rounded-full bg-indigo-200 w-full content-[""];
+
+        &::before {
+          @apply block h-full bg-sky-500 content-[""] w-[var(--x)] rounded-full;
+          transition: width .3s ease;
+        }
+      }
+
+      .dot {
+        transform: translateX(var(--x));
+        transition: width .3s ease;
       }
 
       .bubble {
         $color: #e66190;
 
-        @apply w-fit h-fit p-2 absolute bottom-[calc(100%+.8rem)] text-stone-500 rounded-md m-auto bg-white;
+        @apply w-fit h-fit py-2 px-3 absolute bottom-[calc(100%+.8rem)] text-stone-500 rounded-md m-auto bg-white;
         background-color: #fff;
         box-shadow: 0 0 6px 0 $color;
 

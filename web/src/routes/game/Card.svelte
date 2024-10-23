@@ -33,25 +33,15 @@
     return v?.toString()
   }
 
-  function init(el: HTMLDivElement) {
-    const ac = new AbortController()
-
-    el.addEventListener('transitionend', e => {
-      onDeal?.()
-    }, {signal: ac.signal})
-
-    return {
-      destroy() {
-        ac.abort()
-      }
-    }
+  function onTransitionEnd() {
+    onDeal?.()
   }
 
   export {root}
 </script>
 
 <div
-  use:init
+  ontransitionend={onTransitionEnd}
   bind:this={root}
   class={_class}>
   {#if props.showdown}
