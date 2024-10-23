@@ -26,7 +26,11 @@
     avatarRef: undefined as undefined | HTMLElement,
     /** 发牌动画结束 */
     dealt: false,
-    raise: {progress: 0, x: 0}
+    raise: {progress: 0, x: 0},
+    progressBar: {
+      pressed: false,
+
+    }
   })
 
   $effect(() => {
@@ -65,6 +69,37 @@
   const acts = $derived.by(() => {
     return ['fold', 'check', 'call', 'raise']
   }) as yew.ActionType[]
+
+  /** 拖动进度条下注的操作 */
+  const drag: Action = el => {
+    const ac = new AbortController()
+
+    let down = false
+
+    el.addEventListener('pointerdown', e => {
+      const ct = e.currentTarget as HTMLElement
+      const p = e.offsetX / ct.offsetWidth
+      snap.raise.x = e.offsetX
+      snap.raise.progress = p
+      ct.style.setProperty('--x', `${e.offsetX}px`)
+      down = true
+    }, {signal: ac.signal})
+
+    el.addEventListener('pointermove', e => {
+      if (!down) return
+      const ct = e.currentTarget as HTMLElement
+      const p = e.offsetX / ct.offsetWidth
+      snap.raise.x = e.offsetX
+      snap.raise.progress = p
+      ct.style.setProperty('--x', `${e.offsetX}px`)
+    }, {signal: ac.signal})
+
+    $effect(() => {
+      return () => {
+        ac.abort()
+      }
+    })
+  }
 </script>
 
 
@@ -92,13 +127,7 @@
           <span>{act}</span>
           {#if act === 'raise'}
             <div class="absolute w-fit h-fit bg-white rounded-md bottom-[calc(100%+8px)] right-0 shadow-lg px-4 py-2">
-              <div class="progress-bar"
-                style:--x={`${snap.raise.x}px`}
-                onpointerdown={e => {
-                  const p = e.offsetX / e.currentTarget.offsetWidth
-                  snap.raise.x = e.offsetX
-                  snap.raise.progress = p
-                }}>
+              <div class="progress-bar" use:drag>
                 <i></i>
                 <div
                   class="dot w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md flex justify-center">
@@ -189,7 +218,7 @@
         @apply block h-2 rounded-full bg-indigo-200 w-full content-[""];
 
         &::before {
-          @apply block h-full bg-sky-500 content-[""] w-[var(--x)] rounded-full;
+          @apply block h-full bg-sky-500 content-[""] w-[var(--x,0)] rounded-full;
           transition: width .3s ease;
         }
       }
