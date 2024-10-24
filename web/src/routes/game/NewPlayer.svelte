@@ -1,7 +1,6 @@
 <script lang="ts">
   import clsx from 'clsx'
-  import {fade, fly} from 'svelte/transition'
-  import {cubicOut} from 'svelte/easing'
+  import {on} from 'svelte/events'
   import type {Action} from 'svelte/action'
 
   import {Player, room} from '~/core/simulator.svelte'
@@ -26,10 +25,10 @@
     avatarRef: undefined as undefined | HTMLElement,
     /** 发牌动画结束 */
     dealt: false,
-    raise: {progress: 0, x: 0},
+    // raise: {progress: 0, x: 0},
     progressBar: {
       pressed: false,
-
+      percent: 0,
     }
   })
 
@@ -55,7 +54,7 @@
   })
 
   const bet = $derived.by(() => {
-    let currentBet = room.state.currentBet + (data.balance - room.state.currentBet) * snap.raise.progress
+    let currentBet = room.state.currentBet + (data.balance - room.state.currentBet) * snap.progressBar.percent
     currentBet |= 0 // 取整
     const r = currentBet % 10
     if (r < 5) currentBet -= r
@@ -72,33 +71,40 @@
 
   /** 拖动进度条下注的操作 */
   const drag: Action = el => {
-    const ac = new AbortController()
-
     let down = false
+    let s = 0
+    let x = 0
+    const ms = el.offsetWidth
 
-    el.addEventListener('pointerdown', e => {
-      const ct = e.currentTarget as HTMLElement
-      const p = e.offsetX / ct.offsetWidth
-      snap.raise.x = e.offsetX
-      snap.raise.progress = p
-      ct.style.setProperty('--x', `${e.offsetX}px`)
+    function onEnd() {
+      down = false
+      el.classList.remove('pressed')
+    }
+
+    on(el, 'pointerdown', e => {
+      const target = e.target as HTMLElement
+      if (target.parentElement !== el && target !== el) return
       down = true
-    }, {signal: ac.signal})
+      x = e.pageX
+      if (target.classList.contains('dot')) return
+      s = e.offsetX
+      snap.progressBar.percent = s / ms
+      el.style.setProperty('--x', `${s}px`)
+    }, {passive: true})
 
-    el.addEventListener('pointermove', e => {
+    on(el, 'pointermove', e => {
       if (!down) return
-      const ct = e.currentTarget as HTMLElement
-      const p = e.offsetX / ct.offsetWidth
-      snap.raise.x = e.offsetX
-      snap.raise.progress = p
-      ct.style.setProperty('--x', `${e.offsetX}px`)
-    }, {signal: ac.signal})
+      el.classList.add('pressed')
+      s += e.pageX - x
+      x = e.pageX
+      if (s < 0) s = 0
+      else if (s > ms) s = ms
+      snap.progressBar.percent = s / ms
+      el.style.setProperty('--x', `${s}px`)
+    }, {passive: true})
 
-    $effect(() => {
-      return () => {
-        ac.abort()
-      }
-    })
+    on(el, 'pointerup', onEnd)
+    on(el, 'pointercancel', onEnd)
   }
 </script>
 
@@ -214,18 +220,26 @@
     .progress-bar {
       @apply h-6 flex items-center relative;
 
+      &:not(:global(.pressed)) {
+        & > i::before {
+          transition: width .3s ease;
+        }
+
+        .dot {
+          transition: transform .3s ease;
+        }
+      }
+
       & > i {
         @apply block h-2 rounded-full bg-indigo-200 w-full content-[""];
 
         &::before {
           @apply block h-full bg-sky-500 content-[""] w-[var(--x,0)] rounded-full;
-          transition: width .3s ease;
         }
       }
 
       .dot {
         transform: translateX(var(--x));
-        transition: width .3s ease;
       }
 
       .bubble {
