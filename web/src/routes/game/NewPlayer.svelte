@@ -250,10 +250,11 @@
         box-shadow: 0 0 6px 0 $color;
 
         &::after {
-          @apply w-0 h-0 content-[""] block absolute m-auto left-0 right-0 bottom-0 top-[calc(100%+.5rem)];
+          @apply w-0 h-0 content-[""] block absolute m-auto left-0 right-0 bottom-0 top-full;
           border: .5rem solid transparent;
           border-top-color: #fff;
           filter: drop-shadow(0 1px 0 $color);
+          transform: translateY(calc(50% - 1px));
         }
       }
     }
