@@ -1,12 +1,13 @@
 <script lang="ts">
   import clsx from 'clsx'
   import {on} from 'svelte/events'
+  import {fly} from 'svelte/transition'
   import type {Action} from 'svelte/action'
 
   import {Player, room} from '~/core/simulator.svelte'
   import {audio} from '~/core'
   import Card from './Card.svelte'
-  import {Button, Digit} from '$lib/sui'
+  import {Button, Digit, onKeyDown} from '$lib/sui'
   import {Key, CircleD} from '$lib/sui/icon'
   import * as store from '~/core/store.svelte'
 
@@ -29,6 +30,12 @@
     progressBar: {
       pressed: false,
       percent: 0,
+    },
+
+    raisePanel: {
+      dom: undefined as undefined | HTMLElement,
+      active: false,
+      trigger: undefined as undefined | HTMLElement,
     }
   })
 
@@ -74,7 +81,11 @@
     let down = false
     let s = 0
     let x = 0
+
     const ms = el.offsetWidth
+    const ac = new AbortController()
+
+    snap.progressBar.percent = 0
 
     function onEnd() {
       down = false
@@ -90,7 +101,7 @@
       s = e.offsetX
       snap.progressBar.percent = s / ms
       el.style.setProperty('--x', `${s}px`)
-    }, {passive: true})
+    }, {passive: true, signal: ac.signal})
 
     on(el, 'pointermove', e => {
       if (!down) return
@@ -101,10 +112,23 @@
       else if (s > ms) s = ms
       snap.progressBar.percent = s / ms
       el.style.setProperty('--x', `${s}px`)
-    }, {passive: true})
+    }, {passive: true, signal: ac.signal})
 
-    on(el, 'pointerup', onEnd)
-    on(el, 'pointercancel', onEnd)
+    on(el, 'pointerup', onEnd, {signal: ac.signal})
+    on(el, 'pointercancel', onEnd, {signal: ac.signal})
+    on(document, 'pointerup', e => {
+      onEnd()
+      const target = e.target as HTMLElement
+      if (snap.raisePanel.dom?.contains(target) || snap.raisePanel.trigger?.contains(target)) return
+      // 如果点到了外面隐藏
+      snap.raisePanel.active = false
+    }, {signal: ac.signal})
+
+    $effect(() => {
+      return () => {
+        ac.abort()
+      }
+    })
   }
 </script>
 
@@ -124,20 +148,26 @@
     <div class="absolute bottom-[calc(100%_+_2rem)] mb-2 z-[3] w-fit h-fit flex gap-2">
       {#each acts as act, i (act)}
         <div
-          class="relative action text-center capitalize w-[4rem] h-fit bg-pink-500/80 text-white rounded-md p-2 text-normal"
-          class:!bg-lime-500={act === 'fold'}
-          class:!bg-cyan-500={act === 'check'}
-          class:!bg-pink-500={act === 'call'}
-          class:!bg-yellow-500={act === 'raise'}
-          style:transition-delay={`${i * .1}s`}>
+          class={clsx('relative action text-center capitalize w-[4rem] h-fit bg-pink-500/80 text-white rounded-md p-2 text-normal', act)}
+          tabindex="0"
+          onkeydown={onKeyDown}
+          role="button"
+          onclick={e => {
+            const target = e.target as HTMLElement
+            snap.raisePanel.trigger = e.currentTarget
+            if (snap.raisePanel.dom?.contains(target) || act !== 'raise') return
+            snap.raisePanel.active = !snap.raisePanel.active
+          }}>
           <span>{act}</span>
-          {#if act === 'raise'}
-            <div class="absolute w-fit h-fit bg-white rounded-md bottom-[calc(100%+8px)] right-0 shadow-lg px-4 py-2">
+          {#if act === 'raise' && snap.raisePanel.active}
+            <div class="absolute w-fit h-fit bg-white rounded-md bottom-[calc(100%+8px)] right-0 shadow-lg px-4 py-2"
+              transition:fly={{x: 50}}
+              bind:this={snap.raisePanel.dom}>
               <div class="progress-bar" use:drag>
                 <i></i>
                 <div
                   class="dot w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md flex justify-center">
-                  <div class="bubble"><Digit value={bet}/></div>
+                  <div class="bubble"><Digit value={bet} anime={false}/></div>
                 </div>
               </div>
               <div class="flex items-center justify-end gap-2 mt-2 whitespace-nowrap">
@@ -147,7 +177,7 @@
               </div>
             </div>
           {/if}
-        </div>
+          </div>
       {/each}
     </div>
   {/if}
@@ -210,11 +240,28 @@
   .action {
     opacity: 1;
     transform: translateY(0);
-    transition: all .5s ease;
+    transition: opacity .5s ease, transform .5s ease, background-color .2s ease;
+    user-select: none;
 
     @starting-style {
       opacity: 0;
       transform: translateY(20px);
+    }
+
+    &.fold {
+      @apply bg-lime-500 hover:bg-lime-600;
+    }
+
+    &.check {
+      @apply bg-cyan-500 hover:bg-cyan-600;
+    }
+
+    &.call {
+      @apply bg-pink-500 hover:bg-pink-600;
+    }
+
+    &.raise {
+      @apply bg-yellow-500 hover:bg-yellow-600;
     }
 
     .progress-bar {
