@@ -249,11 +249,11 @@
     }
 
     &.fold {
-      @apply bg-lime-500 hover:bg-lime-600;
+      @apply bg-teal-500 hover:bg-teal-600;
     }
 
     &.check {
-      @apply bg-cyan-500 hover:bg-cyan-600;
+      @apply bg-lime-500 hover:bg-lime-600;
     }
 
     &.call {
@@ -261,7 +261,7 @@
     }
 
     &.raise {
-      @apply bg-yellow-500 hover:bg-yellow-600;
+      @apply bg-sky-500 hover:bg-sky-600;
     }
 
     .progress-bar {
