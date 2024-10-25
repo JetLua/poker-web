@@ -8,7 +8,7 @@
   import {audio} from '~/core'
   import Card from './Card.svelte'
   import {Button, Digit, onKeyDown} from '$lib/sui'
-  import {Key, CircleD} from '$lib/sui/icon'
+  import {Key, CircleD, CircleMinus, CirclePlus} from '$lib/sui/icon'
   import * as store from '~/core/store.svelte'
 
   interface Props {
@@ -26,10 +26,11 @@
     avatarRef: undefined as undefined | HTMLElement,
     /** 发牌动画结束 */
     dealt: false,
-    // raise: {progress: 0, x: 0},
+
     progressBar: {
-      pressed: false,
-      percent: 0,
+      step: 0,
+      totalStep: 0,
+      stepWidth: 0
     },
 
     raisePanel: {
@@ -61,7 +62,7 @@
   })
 
   const bet = $derived.by(() => {
-    let currentBet = room.state.currentBet + (data.balance - room.state.currentBet) * snap.progressBar.percent
+    let currentBet = room.state.currentBet + room.state.minBet * snap.progressBar.step
     currentBet |= 0 // 取整
     const r = currentBet % 10
     if (r < 5) currentBet -= r
@@ -85,11 +86,28 @@
     const ms = el.offsetWidth
     const ac = new AbortController()
 
-    snap.progressBar.percent = 0
+    // 划分格子
+    const dl = data.balance - room.state.currentBet
+    const totalStep = Math.ceil(dl / room.state.minBet)
+    const stepWidth = ms / totalStep
+    const hStepWidth = stepWidth / 2
+
+    snap.progressBar.stepWidth = stepWidth
+    snap.progressBar.totalStep = totalStep
 
     function onEnd() {
       down = false
       el.classList.remove('pressed')
+    }
+
+    function calc() {
+      let _s = s
+      const r = _s % stepWidth
+
+      if (r < hStepWidth) _s -= r
+      else _s += stepWidth - r
+
+      snap.progressBar.step = _s / stepWidth
     }
 
     on(el, 'pointerdown', e => {
@@ -99,8 +117,7 @@
       x = e.pageX
       if (target.classList.contains('dot')) return
       s = e.offsetX
-      snap.progressBar.percent = s / ms
-      el.style.setProperty('--x', `${s}px`)
+      calc()
     }, {passive: true, signal: ac.signal})
 
     on(el, 'pointermove', e => {
@@ -110,8 +127,7 @@
       x = e.pageX
       if (s < 0) s = 0
       else if (s > ms) s = ms
-      snap.progressBar.percent = s / ms
-      el.style.setProperty('--x', `${s}px`)
+      calc()
     }, {passive: true, signal: ac.signal})
 
     on(el, 'pointerup', onEnd, {signal: ac.signal})
@@ -129,6 +145,13 @@
         ac.abort()
       }
     })
+  }
+
+  function stepBet(v: 1 | -1) {
+    if ((snap.progressBar.step < 1 && v === -1) ||
+      (snap.progressBar.step === snap.progressBar.totalStep && v === 1)
+    ) return
+    snap.progressBar.step += v
   }
 </script>
 
@@ -163,13 +186,21 @@
             <div class="absolute w-fit h-fit bg-white rounded-md bottom-[calc(100%+8px)] right-0 shadow-lg px-4 py-2"
               transition:fly={{x: 50}}
               bind:this={snap.raisePanel.dom}>
-              <div class="progress-bar" use:drag>
-                <i></i>
-                <div
-                  class="dot w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md flex justify-center">
-                  <div class="bubble"><Digit value={bet} anime={false}/></div>
+              <div class="flex items-center gap-x-2 w-full">
+                <button onclick={stepBet.bind(null, -1)}><CircleMinus class="stroke-lime-500"/></button>
+                <div class="progress-bar flex-1" use:drag
+                  style:--x={`${snap.progressBar.step * snap.progressBar.stepWidth}px`}>
+                  <!-- 进度条 -->
+                  <i></i>
+                  <!-- 位置点 -->
+                  <div
+                    class="dot w-4 h-4 rounded-full bg-sky-500 absolute top-0 bottom-0 my-auto left-[-.5rem] shadow-md flex justify-center">
+                    <div class="bubble"><Digit value={bet} anime={false}/></div>
+                  </div>
                 </div>
+                <button onclick={stepBet.bind(null, 1)}><CirclePlus class="stroke-pink-500"/></button>
               </div>
+
               <div class="flex items-center justify-end gap-2 mt-2 whitespace-nowrap">
                 <button class="text-white bg-sky-500 rounded-md p-2 py-1">1/2 Pot</button>
                 <button class="text-white bg-sky-500 rounded-md p-2 py-1">All in</button>

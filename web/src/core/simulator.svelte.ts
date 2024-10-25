@@ -44,6 +44,10 @@ export class Room {
       {placeholder: true}
     ],
     logs: [] as string[],
+    /** 当前房间最小下注金额 */
+    minBet: 10,
+    /** 最大下注金额：默认无限制 */
+    maxBet: Infinity,
     turnsIndex: 0,
     turns: [{}] as Record<string, number>[],
     capcity: 4,
