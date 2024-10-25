@@ -5,7 +5,7 @@
   import type {Action} from 'svelte/action'
 
   import {Player, room} from '~/core/simulator.svelte'
-  import {audio} from '~/core'
+  import {audio, delay} from '~/core'
   import Card from './Card.svelte'
   import {Button, Digit, onKeyDown} from '$lib/sui'
   import {Key, CircleD, CircleMinus, CirclePlus} from '$lib/sui/icon'
@@ -120,7 +120,7 @@
       calc()
     }, {passive: true, signal: ac.signal})
 
-    on(el, 'pointermove', e => {
+    on(document, 'pointermove', e => {
       if (!down) return
       el.classList.add('pressed')
       s += e.pageX - x
@@ -152,6 +152,10 @@
       (snap.progressBar.step === snap.progressBar.totalStep && v === 1)
     ) return
     snap.progressBar.step += v
+  }
+
+  export function a() {
+
   }
 </script>
 

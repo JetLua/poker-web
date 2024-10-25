@@ -5,7 +5,7 @@
   import {audio, delay, store} from '~/core'
   import Player from './NewPlayer.svelte'
   import Card from './Card.svelte'
-    import Digit from '~/lib/sui/Digit.svelte'
+  import Digit from '$lib/sui/Digit.svelte'
 
   const room = simulator.room
 
