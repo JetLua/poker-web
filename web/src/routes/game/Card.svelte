@@ -1,6 +1,7 @@
 <script lang="ts">
   import clsx from 'clsx'
   import {Heart, Club, Diamond, Spade} from '$lib/sui/icon'
+    import {audio} from '~/core'
 
   interface Props {
     class?: string
@@ -21,7 +22,7 @@
     const cls = [props.class, 'card']
     cls.push(props.type)
     if (placeholder) cls.push('placeholder')
-    if (props.showdown) cls.push('showdown')
+    if (props.showdown || (props.type === 'public' && suit)) cls.push('showdown')
     return clsx(cls)
   })
 
@@ -33,7 +34,12 @@
     return v?.toString()
   }
 
+  /** 防止多个 transtion 导致的重复调用 */
+  let dealt = false
+
   function onTransitionEnd() {
+    if (dealt) return
+    dealt = true
     onDeal?.()
   }
 
@@ -82,11 +88,16 @@
     border: 1px dashed #fff;
     border-radius: .2rem;
     width: 2.5rem;
+    position: relative;
 
-    &:not(.placeholder) {
+    &:not(.placeholder, .showdown) {
       border: none;
       border-radius: 0;
       background: url("/game/card-back.png") center / cover no-repeat;
+    }
+
+    &.showdown {
+      background-color: #fff;
     }
   }
 

@@ -19,6 +19,8 @@
     lPlayers: [] as simulator.Player[],
     /** right slots */
     rPlayers: [] as simulator.Player[],
+
+    dealCount: 0
   })
 
   $effect(() => {
@@ -53,14 +55,15 @@
 
   $effect(() => {
     if (room.state.phase !== 'deal') return
+    if (snap.dealCount !== room.state.playersCount) return
 
-    !async function() {
+    untrack(async () => {
       for (const c of room.state.cards) {
         c.placeholder = false
         audio.play('slide')
         await delay(.2)
       }
-    }()
+    })
   })
 
   const pot = $derived.by(() => {
@@ -77,14 +80,20 @@
 <div class="root w-screen h-dvh bg-indigo-100 m-auto mx-[-1rem] relative">
   <div class="w-fit h-fit absolute m-auto top-0 left-0 right-0 bottom-0" bind:this={snap.desktopRef}>
     <section class="absolute bottom-full w-full text-center text-white/50 mb-4 flex flex-col gap-y-2">
-      {#each room.state.logs as l (l)}
+      {#each room.state.logs as l, i (`${l}${i}`)}
         <p in:slide={{duration: 3e2}}>{l}</p>
       {/each}
     </section>
     <div class="flex flex-col gap-2">
       <div class="flex w-fit h-fit gap-2">
         {#each room.state.cards as card, i (i)}
-          <Card placeholder={card.placeholder} type="public"/>
+          <Card
+            placeholder={card.placeholder}
+            type="public"
+            num={card.num}
+            suit={card.suit}
+            showdown={!!card.suit}
+          />
         {/each}
       </div>
       <div class="flex self-center justify-center items-center text-white font-[monospace] bg-black/40 h-7 rounded-md w-fit px-4 mt-2">Pot: <Digit value={pot}/></div>
@@ -94,10 +103,11 @@
   <!-- 上插槽 -->
   {#if snap.tPlayers.length}
     <div class="absolute flex gap-x-8 items-center mx-auto left-0 right-0 top-0 h-fit w-fit">
-      {#each snap.tPlayers as p}
+      {#each snap.tPlayers as p (p.state.id)}
         <Player
           data={p.state}
           orientation="top"
+          onDeal={() => snap.dealCount++}
         />
       {/each}
     </div>
@@ -106,10 +116,11 @@
   <!-- 左插槽 -->
   {#if snap.lPlayers.length}
     <div class="absolute gap-y-4 justify-center flex-col-reverse flex left-0 top-0 bottom-0 my-auto w-fit h-fit">
-      {#each snap.lPlayers as p}
+      {#each snap.lPlayers as p (p.state.id)}
         <Player
           data={p.state}
           orientation="left"
+          onDeal={() => snap.dealCount++}
         />
       {/each}
     </div>
@@ -118,10 +129,11 @@
   <!-- 右插槽 -->
   {#if snap.rPlayers.length}
     <div class="absolute gap-y-4 justify-center flex-col flex right-0 top-0 bottom-0 my-auto w-fit h-fit">
-      {#each snap.rPlayers as p}
+      {#each snap.rPlayers as p (p.state.id)}
         <Player
           data={p.state}
           orientation="right"
+          onDeal={() => snap.dealCount++}
         />
       {/each}
     </div>
@@ -130,10 +142,11 @@
   <!-- 下插槽 -->
   {#if snap.bPlayers.length}
     <div class="absolute gap-y-2 justify-center flex-col flex right-0 left-0 bottom-0 mx-auto w-fit h-fit">
-      {#each snap.bPlayers as p}
+      {#each snap.bPlayers as p (p.state.id)}
         <Player
           data={p.state}
           orientation="bottom"
+          onDeal={() => snap.dealCount++}
         />
       {/each}
     </div>

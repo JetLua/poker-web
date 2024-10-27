@@ -76,6 +76,7 @@ declare global {
     type RoomPhase = 'ready' | 'deal' | 'player' | 'flop'
 
     interface Card {
+      placeholder?: boolean
       num: number
       suit: 'heart' | 'spade' | 'diamond' | 'club'
     }

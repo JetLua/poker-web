@@ -14,9 +14,10 @@
   interface Props {
     data: Player['state']
     orientation: yew.Orientation
+    onDeal: () => void
   }
 
-  const {data, orientation}: Props = $props()
+  const {data, orientation, onDeal}: Props = $props()
   const snap = $state({
     // holeCards: [
     //   {ref: undefined as ReturnType<typeof Card>, x: 0, y: 0},
@@ -153,10 +154,6 @@
     ) return
     snap.progressBar.step += v
   }
-
-  export function a() {
-
-  }
 </script>
 
 
@@ -171,7 +168,8 @@
       onclick={room.start.bind(room)}
     >Start</Button>
   {/if}
-  {#if store.user.id === data.id && data.id === room.state.owner && room.state.phase === 'deal'}
+  {#if store.user.id === data.id && data.id === room.state.owner &&
+    room.state.phase === 'deal' && data.status === 'act'}
     <div class="absolute bottom-[calc(100%_+_2rem)] mb-2 z-[3] w-fit h-fit flex gap-2">
       {#each acts as act, i (act)}
         <div
@@ -223,12 +221,17 @@
       {#if room.state.phase === 'deal'}
         {@const c = snap.holeCard}
         {#key `${c.x}${c.y}`}
-          <Card
-            type="effect"
-            --x={`${snap.holeCard.x}px`}
-            --y={`${snap.holeCard.y}px`}
-            onDeal={() => snap.dealt = true}
-          />
+          {#await delay(data.dealIndex * .2) then}
+            <Card
+              type="effect"
+              --x={`${snap.holeCard.x}px`}
+              --y={`${snap.holeCard.y}px`}
+              onDeal={() => {
+                snap.dealt = true
+                onDeal()
+              }}
+            />
+          {/await}
         {/key}
       {/if}
       {#if data.countdown}

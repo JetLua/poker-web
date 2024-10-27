@@ -22,6 +22,7 @@ class AI {
     // 停止前端倒计时
     this.player.state.countdown = 0
     const bet = this.player.prev().state.bet
+
     if (bet < this.player.state.balance) {
       this.player.bet(bet)
       return {action: 'call', v: bet}
@@ -42,7 +43,7 @@ export class Room {
       {placeholder: true},
       {placeholder: true},
       {placeholder: true}
-    ],
+    ] as yew.Card[],
     logs: [] as string[],
     /** 当前房间最小下注金额 */
     minBet: 10,
@@ -87,7 +88,7 @@ export class Room {
   }
 
   constructor() {
-    const total = 10
+    const total = 3
     const {state} = this
 
     state.id = crypto.randomUUID()
@@ -138,7 +139,7 @@ export class Room {
 
   async start() {
     const {state} = this
-    // 抽取随机庄家
+    /** 庄家 */
     const dealer = this.getPlayer(state.playersCount * Math.random() | 0)
     state.dealer = dealer.state.id
     state.phase = 'deal'
@@ -152,18 +153,49 @@ export class Room {
     this.log(`Small blind: ${sb.name}`)
     this.log(`Big blind: ${bb.name}`)
 
-    let r, p
-    // 等待发牌结束
+    // 设置发牌顺序
+    for (let i = 0, current = sb; i < state.playersCount; i++) {
+      current.state.dealIndex = i
+      current = current.next()
+    }
+
+
     this.deal()
     await delay(3)
 
-    p = bb
+    let r
+    /** 第一个说话的玩家 */
+    let start = bb.next(true)
+    let p: Player
+    p = start
+
     while (true) {
-      p = p.next()
       this.log(`${p.name}: Making a decision`)
       r = await p.run('act')
       this.log(`${p.name}: ${r.action} ${r.v}`)
-      break
+      p = p.next(true)
+
+      // 一圈结束
+      if (p === start) {
+        if (state.turnsIndex === 0) {
+          state.cards[0] = this.cards[0]
+          state.cards[1] = this.cards[1]
+          state.cards[2] = this.cards[2]
+        }
+
+        // 清空当前轮下注
+        for (const k in state.players) {
+          const p = state.players[k]
+          p.state.bet = 0
+        }
+
+        this.state.currentBet = 0
+        this.state.turnsIndex++
+        this.state.turns[this.state.turnsIndex] = {}
+
+        start = dealer.next(true)
+        p = start
+      }
     }
   }
 }
@@ -183,13 +215,15 @@ export class Player {
     id: '',
     rid: '',
     index: 0,
+    /** 发牌顺序 */
+    dealIndex: 0,
     name: '',
     bet: 0,
     balance: 0,
     online: true,
     countdown: 0,
     cards: [{}, {}] as yew.Card[],
-    status: '' as 'act'
+    status: '' as 'act' | 'fold' | 'all-in'
   })
 
 
@@ -231,19 +265,37 @@ export class Player {
   }
 
   bet(v: number) {
-    if (v < this.state.balance) {
+    const d = v - this.state.bet
+    if (d < this.state.balance) {
       this.room.state.currentBet = v
-      this.state.bet += v
-      this.state.balance -= v
+      this.state.bet += d
+      this.state.balance -= d
       this.room.state.turns[this.room.state.turnsIndex][this.state.id] = this.state.bet
     } else {
       // todo
     }
   }
 
-  next() {
+  /**
+   * @param filter 为 true 则返回可以说话的玩家
+   */
+  next(filter?: boolean) {
     if (!this.room) return
-    return this.room.getPlayer((this.state.index + 1) % this.room.state.playersCount)
+    let i = this.state.index + 1
+    let p: Player
+
+    while (true) {
+      p = this.room.getPlayer(i % this.room.state.playersCount)
+
+      if (filter) {
+        if (p.state.status === 'all-in' || p.state.status === 'fold') {
+          i++
+          continue
+        }
+      }
+
+      return p
+    }
   }
 
   prev() {
