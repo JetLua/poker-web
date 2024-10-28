@@ -18,7 +18,8 @@ class AI {
    */
   async run(signal: AbortSignal): Promise<yew.Action> {
     // 等待5秒 模拟思考
-    await delay(5)
+    const ok = await delay(5, signal)
+    if (!ok) return
     // 停止前端倒计时
     this.player.state.countdown = 0
     const bet = this.player.prev().state.bet
@@ -241,6 +242,10 @@ export class Player {
     })
   }
 
+  async operate(opts: yew.Action) {
+    this.handle?.(opts)
+  }
+
   async tick(t: number, signal: AbortSignal): Promise<boolean> {
     this.state.countdown = t
     if (!t) return true
@@ -259,6 +264,7 @@ export class Player {
         this.state.status = 'act'
         this.signal = AbortSignal.timeout(10e3)
         this.tick(10, this.signal)
+        // todo: return promise
         return this.ai ? this.ai.run(this.signal) : this.respond(this.signal)
       }
     }

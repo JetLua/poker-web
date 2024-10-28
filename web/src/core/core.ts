@@ -13,7 +13,7 @@ export function ok<T>(data: T): [T, null] {
 
 export function delay(t = 0, signal?: AbortSignal) {
   if (signal?.aborted) return Promise.resolve(false)
-  return new Promise(resolve => {
+  return new Promise<boolean>(resolve => {
     const id = setTimeout(resolve.bind(undefined, true), t * 1e3)
     signal?.addEventListener('abort', () => {
       clearTimeout(id)
