@@ -16,17 +16,17 @@ class AI {
    * 3. 弃牌
    * 4. all in
    */
-  async run(signal: AbortSignal): Promise<yew.Action> {
+  async run(handle: (data: yew.Action) => void, signal: AbortSignal) {
     // 等待5秒 模拟思考
     const ok = await delay(5, signal)
     if (!ok) return
     // 停止前端倒计时
     this.player.state.countdown = 0
-    const bet = this.player.prev().state.bet
+    const bet = this.player.prev(true).state.bet
 
     if (bet < this.player.state.balance) {
       this.player.bet(bet)
-      return {action: 'call', v: bet}
+      handle({action: 'call', v: bet})
     }
   }
 }
@@ -233,15 +233,6 @@ export class Player {
     if (opts.ai) this.ai = new AI(this)
   }
 
-  async respond(signal: AbortSignal) {
-    return new Promise<yew.Action>(resolve => {
-      this.handle = resolve
-      signal.addEventListener('abort', () => {
-        this.handle({action: 'fold'})
-      }, {once: true})
-    })
-  }
-
   async operate(opts: yew.Action) {
     this.handle?.(opts)
   }
@@ -264,8 +255,17 @@ export class Player {
         this.state.status = 'act'
         this.signal = AbortSignal.timeout(10e3)
         this.tick(10, this.signal)
-        // todo: return promise
-        return this.ai ? this.ai.run(this.signal) : this.respond(this.signal)
+
+        const p = new Promise<yew.Action>(resolve => {
+          this.handle = resolve
+          this.signal.addEventListener('abort', () => {
+            this.handle({action: 'fold'})
+          }, {once: true})
+        })
+
+        if (this.ai) this.ai.run(this.handle, this.signal)
+
+        return p
       }
     }
   }
@@ -304,11 +304,28 @@ export class Player {
     }
   }
 
-  prev() {
+  /**
+   * @param filter 为 true 则返回可以说话的玩家
+   */
+  prev(filter?: boolean) {
     if (!this.room) return
     let i = this.state.index - 1
-    if (i < 0) i += this.room.state.playersCount
-    return this.room.getPlayer(i % this.room.state.playersCount)
+    i = i < 0 ? i + this.room.state.playersCount : i
+
+    let p: Player
+
+    while (true) {
+      p = this.room.getPlayer(i % this.room.state.playersCount)
+
+      if (filter) {
+        if (p.state.status === 'all-in' || p.state.status === 'fold') {
+          i++
+          continue
+        }
+      }
+
+      return p
+    }
   }
 }
 
