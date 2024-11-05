@@ -169,7 +169,7 @@
     >Start</Button>
   {/if}
   {#if store.user.id === data.id && data.id === room.state.owner &&
-    room.state.phase === 'deal' && data.status === 'act'}
+    room.state.phase === 'deal' && data.op}
     <div class="absolute bottom-[calc(100%_+_2rem)] mb-2 z-[3] w-fit h-fit flex gap-2">
       {#each acts as act, i (act)}
         <div
@@ -181,6 +181,7 @@
             const target = e.target as HTMLElement
             snap.raisePanel.trigger = e.currentTarget
             if (snap.raisePanel.dom?.contains(target) || act !== 'raise') return
+            // 点击了加注按钮
             snap.raisePanel.active = !snap.raisePanel.active
           }}>
           <span>{act}</span>
@@ -267,7 +268,7 @@
     <!-- 下注占位符 -->
     {#if data.bet}
       <div class="text-sm w-max flex justify-center items-center gap-x-1 shrink-0">
-        <div class="aspect-square w-6 bg-[url('/game/chip.png')] bg-center bg-cover bg-no-repeat bg-[length:80%]"></div>
+        <div class="aspect-square w-6 bg-[url('/game/chip.png')] bg-center bg-cover bg-no-repeat"></div>
         <Digit class="text-white text-sm monospace" value={data.bet}/>
       </div>
     {/if}
